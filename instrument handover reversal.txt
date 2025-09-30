@@ -1,0 +1,14 @@
+select * from qc_los.qt_loandetail where prospectcode='HBHO25000077930';
+select * from qc_los.qt_disb_payment_clearance where prospect_id=1000077931;
+select * from qc_los.qt_disb_payment_clearance_dtl where prospect_id=1000077931;
+select * from qc_lms.qt_rescheduleagr where agreement_id=1000077931 order by 1;
+select * from qc_lms.qt_int_rates_slab_resch where prospectid=1000077931;
+select * from qc_los.qt_pmntsch where prospectid=1000077931 order by due_date; --25576
+select 10842+14734 from dual; --176836
+
+--update 
+update qc_los.qt_disb_payment_clearance set auth_status='X' where prospect_id=1000077931 and clr_id in (1000036531,1000036532);
+update qc_los.qt_disb_payment_clearance_dtl set auth_status='X' where prospect_id=1000077931 and clr_id in (1000036531,1000036532);
+update qc_lms.qt_rescheduleagr set auth_status='X' where agreement_id=1000077931 and rescheduleagr_id<>'1000094324';
+delete from qc_lms.qt_pmntsch_temp_resch where prospectid=1000077931;
+delete from qc_lms.qt_int_rates_slab_resch where prospectid=1000077931 and col_rescheduleagr_id<>'1000094324';

@@ -1,0 +1,25 @@
+HAUR24000053618
+
+update qc_los.qt_applicantaddress ss
+   set ss.mailingaddress = 'Y'
+where ss.applicantid in
+       (select lxc.applicantid
+          from qc_los.qt_loan_x_customer lxc
+         where lxc.prospectid in
+               (select ld.prospectid
+                  from qc_los.qt_loandetail ld
+                 where ld.prospectcode = 'HAUR24000053618')
+           and lxc.applicanttype = '1000000001')
+           and ss.addresstype='1000000001';
+
+select * from qc_los.qt_applicantaddress ss
+  
+where ss.applicantid in
+       (select lxc.applicantid
+          from qc_los.qt_loan_x_customer lxc
+         where lxc.prospectid in
+               (select ld.prospectid
+                  from qc_los.qt_loandetail ld
+                 where ld.prospectcode = 'HAUR24000053618')
+           and lxc.applicanttype = '1000000001')
+           and ss.addresstype='1000000001'

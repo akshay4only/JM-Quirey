@@ -1,0 +1,16 @@
+select ld.prospectcode,rl.auth_date,rl.auth_id,
+trim(upper(replace((am.fname ||' '||am.mname||' ' || am.lname),'  ',' '))) as "Applicant name",
+trim(upper(replace((u.userfname ||' '||u.usermname ||' ' || u.userlname ),'  ',' '))) as "auth",
+am.applicantcode
+from qc_los.qt_loan_reject rl,
+qc_los.qt_loandetail ld,
+qc_los.qt_applicantmaster am,
+qc_user_auth.qm_user u where 
+u.userid= rl.auth_id
+and
+ld.prospectid=rl.prospectid
+and 
+ld.customerid=am.applicantid
+and
+ld.prospectcode in 
+('HAKO23000047041')

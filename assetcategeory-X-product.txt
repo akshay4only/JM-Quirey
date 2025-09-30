@@ -1,0 +1,42 @@
+
+--PRODUCT X ASSETCATEGORY X PROPWERTYTYPE
+
+select * from  qc_master.qm_product c where c.active ='A';
+
+select p.prodname as parent, c.prodname as child  from qc_master.qm_product c left join qc_master.qm_product p on 
+c.parentprodid =p.productid
+where p.active ='A' order by 1,2 DESC;
+
+select distinct(ac.displayname) from qc_master.qm_assetcategory ac where ac.active='A';
+
+select distinct(pt.displayname) from qc_master.qm_propertytype pt where pt.active='A';
+
+select (select distinct(p.prodname) from qc_master.qm_product p where p.active ='A' and p.parentprodid is not NULL),
+(select distinct(ac.displayname) from qc_master.qm_assetcategory ac where ac.active='A'),
+(select distinct(pt.displayname) from qc_master.qm_propertytype pt where pt.active='A') from dual;
+
+
+select distinct(p.prodname),(select distinct(pt.displayname) from qc_master.qm_propertytype pt where pt.active='A')
+from qc_master.qm_product p ,
+qc_master.qm_assetcategory ac
+where p.active ='A' and p.parentprodid is not NULL and
+ac.active='A';
+
+select PRO."parent",PRO."product",ACT."Asset Category",PTY."Property Type"
+from
+(select distinct(p.prodname) as "product",p.parentprodid as "parent" from qc_master.qm_product p where p.active ='A' and p.parentprodid is not NULL) PRO,
+(select distinct(ac.displayname) as "Asset Category" from qc_master.qm_assetcategory ac where ac.active='A') ACT,
+(select distinct(pt.displayname) as "Property Type" from qc_master.qm_propertytype pt where pt.active='A') PTY
+
+order by 1,2,3,4;
+
+select * from  qc_master.qm_product c where c.productid in (
+1000000046,
+1000000047,
+2000000050,
+2000000057,
+2000000088,
+2000000089,
+2000000096,
+2000000097,
+2000000113);

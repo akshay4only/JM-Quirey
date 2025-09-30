@@ -1,0 +1,13 @@
+select * from qc_los.qt_loandetail where prospectcode IN ('HBHO25000080565','LHOS25000080351');
+select * from qc_lms.qt_loancharge where prospect_id=1000080352; --56992.96
+select * from qm_scheme_x_charge a where a.chargeid=1000000200 and a.productid=2000000061;
+select * from qc_los.qt_prospect_x_insurance where prospectid=1000080352;
+select * from qc_lms.qt_loancharge where charge_id=1000000200 and service_tax>0 and charge_status=0;
+
+select * from qc_lms.qt_loancharge where prospect_id=1000076793; --56992.96
+select * from qc_los.qt_prospect_x_insurance where prospectid=1000076793;
+
+select 9999.152+5705.084+14406.779 from dual; --30111.015
+select 1799.84+1026.92+2593.22 from dual; --5419.98
+select 2296.6+2296.6 from dual;
+select 25517.82*18/100 from dual;

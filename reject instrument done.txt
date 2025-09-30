@@ -1,0 +1,5 @@
+update qc_los.qt_disb_payment_clearance set auth_status='X' where prospect_id=1000078762 and clr_id=1000036905;
+update qc_los.qt_disb_payment_clearance_dtl set auth_status='X' where prospect_id=1000078762 and clr_id=1000036905;
+update qc_lms.qt_rescheduleagr set auth_status='X' where agreement_id=1000078762 and rescheduleagr_id=1000095173;
+delete from qc_lms.qt_int_rates_slab_resch where prospectid=1000078762 and col_rescheduleagr_id<>1000094868;
+delete from qc_lms.qt_pmntsch_temp_resch where prospectid=1000078762;

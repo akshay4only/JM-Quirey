@@ -1,0 +1,31 @@
+
+--select * from QC_MASTER.QM_USERROLE   -- 2000000060 ckyc
+
+--SELECT *
+--              FROM QC_MASTER.QM_ACTION
+--             WHERE MENU_NAME LIKE '%CKYC_UPLOAD%'
+             
+             >1000001300->1000001301->1100106491
+             
+             select max(USERROLE_X_MENU_ID) from QC_MASTER.QM_ROLE rol where rol.role_id='2000000060'
+             
+              INSERT INTO QC_MASTER.QM_ROLE
+        (USERROLE_X_MENU_ID,
+         ROLE_ID,
+         ACTION_ID,
+         PRIVILEGE_ID,
+         DESCRIPTION,
+         IS_ACTIVE,
+         CREATED_DATETIME,
+         UPDATE_DATETIME)
+      VALUES
+        (LN_USERROLE_X_MENU_ID,
+         LN_USERROLEID,
+         I.ACTION_ID,
+         'E',
+         'CKYC UPLOAD',
+         'A',
+         SYSDATE,
+         SYSDATE);
+             
+             

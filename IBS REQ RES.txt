@@ -1,0 +1,20 @@
+
+select * from qc_integration_box.ib_cbl_req_res 
+
+
+select * from qc_integration_box.ib_cbl_req_res re where re.corelationid like '%CN0000000141716%'
+
+select * from qc_integration_box.ib_cbl_req_res;
+
+
+select * from qc_integration_box.ib_K_req_res;
+
+
+select substr(corelationid,38),tag,status,trunc(updated_time) from qc_integration_box.ib_K_req_res;
+
+
+
+select substr(corelationid,38) as custID,tag,status,trunc(updated_time) from qc_integration_box.ib_K_req_res k,
+qc_los.qt_loandetail@mifin_prod ld, qc_los.qt_loan_x_customer@mifin_prod lxc
+where lxc.prospectid=ld.prospectid and
+k.custID=lxc.applicantid;

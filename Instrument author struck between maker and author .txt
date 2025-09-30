@@ -1,0 +1,7 @@
+select * from qc_los.qt_disb_payment_clearance p where p.prospect_id='1000047993' and p.clr_id='1000036473';
+
+update qc_los.qt_disb_payment_clearance p set p.auth_status='R' where p.prospect_id='1000047993' and p.clr_id='1000036473';
+
+select * from qc_los.qt_disb_payment_clearance_dtl p where p.clr_id='1000036473';
+
+update qc_los.qt_disb_payment_clearance_dtl p set p.auth_status='R' where p.clr_id='1000036473';

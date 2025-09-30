@@ -1,0 +1,13 @@
+
+update qc_lms.qt_batchhdr h set h.no_of_instr_clearance='1' where h.batch_id='1000020441';
+
+--P to M
+
+update qc_lms.qt_batchhdr h set h.auth_status='M' where h.batch_id='1000020441';
+
+select * from qc_lms.qt_batchdtl dt where dt.batch_id='1000020441' and dt.prospect_id='1000074364';
+
+--1000011676
+
+update qc_lms.qt_batchdtl dt set dt.c_auth_status='M',dt.instrument_status='D' where dt.batch_id='1000020441' 
+and dt.prospect_id='1000074364'

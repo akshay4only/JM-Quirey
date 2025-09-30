@@ -1,0 +1,13 @@
+Error Description 404 : Dispatcher or URL mapping ( DispatcherNotFoundException [statusCode=404, logLevel=FINER, reasons=[]] )
+
+Solution : 
+1.	Check for User Account (Locked/Unlocked/Expired/)
+2.	Check for Plsql gateway Config. (select * from ORDS_METADATA.PLSQL_GATEWAY_CONFIG)
+3.	Reconfigure Ords to process Apex correctly using below query statement.
+BEGIN
+ORDS_ADMIN.CONFIG_PLSQL_GATEWAY(
+p_runtime_user => 'ORDS_PUBLIC_USER', /* when using this user */
+p_plsql_gateway_user => 'APEX_PUBLIC_USER' /* run OWA things as this user */
+);
+END;
+4.	Restart ORDS services.

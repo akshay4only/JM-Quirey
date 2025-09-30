@@ -1,0 +1,103 @@
+declare
+  l_id             number;
+  l_IDVALUE        number;
+  l_CODEVALUE      varchar2(100);
+  l_STATUS         varchar2(1);
+  l_ERROR_CODE     varchar2(100);
+  l_ERROR_DESC     varchar2(1000);
+  l_maker_id       number := 1000000023;
+  l_author_id      number := 1000000023;
+  l_maker_remarks  varchar2(100) := 'Online Request';
+  l_author_remarks varchar2(100) := 'ok';
+  l_user_email_id  varchar2(100);
+  l_bank_name      varchar2(200);
+
+begin
+--  begin
+--  select jmfl_email_id
+--    into l_user_email_id
+--    from hfc_user_master um
+--   where upper(um.domain_id) = upper(:APP_USER);
+--exception
+--when others then return;
+--  end;
+
+begin
+select p.bank_name
+  into l_bank_name
+  from qc_master.qm_bank p
+ where p.bankidnum = :P165_BANK;
+exception
+when others then return;
+end;
+
+  if :P165_BANK is not null and :P165_BANKBRANCH is not null and :P165_IFSC is not null and :P165_MICR is not null
+  then
+  if :P165_REC_COUNT = 0 then  
+    PR_GENERATE(P_SEQUENCENAME => 'QM_BANKBRANCH',
+                          P_IDVALUE      => l_IDVALUE,
+                          P_CODEVALUE    => l_CODEVALUE,
+                          P_STATUS       => l_STATUS,
+                          P_ERROR_CODE   => l_ERROR_CODE,
+                          P_ERROR_DESC   => l_ERROR_DESC);
+    insert into qc_master.qm_bankbranch
+      (branch_id,
+       branch_code,
+       branch_name,
+       bank_id,
+       micr_code,
+       ifsc_code,
+       bankbranch_id,
+       city_id,
+       clearing_house,
+       active,
+       maker_id,maker_date,maker_sysdate,maker_remarks,auth_id,auth_date,auth_sysdate,auth_remark
+       )
+    values
+      (l_IDVALUE,
+       l_CODEVALUE,
+       :P165_BANKBRANCH,
+       :P165_BANK,
+       :P165_MICR,
+       :P165_IFSC,
+       l_IDVALUE,
+       1,
+       1000000001,
+       'A',
+       l_maker_id,sysdate,sysdate,l_maker_remarks,l_author_id,sysdate,sysdate,l_author_remarks);
+    commit;
+  /*
+   l_id:= apex_mail.send (
+        p_to                 => l_user_email_id,
+        p_from      => 'hfc.support@jmfl.com',
+        p_cc        => 'mifin.support@jmfl.com',
+        p_template_static_id => 'BANK_BRANCH_DETAILS',
+        p_placeholders       => '{' ||
+        '    "BANK_BRANCH":'  || apex_json.stringify( :P165_BANKBRANCH ) ||
+        '   ,"BANK_NAME":'    || apex_json.stringify( l_bank_name ) ||
+        '   ,"IFSC":'         || apex_json.stringify( :P165_IFSC ) ||
+        '   ,"MAIL_SUBJECT":' || apex_json.stringify( 'Bank Branch Created Successfully' ) ||
+        '   ,"MICR":'         || apex_json.stringify( :P165_MICR ) ||
+        '   ,"USER_NAME":'    || apex_json.stringify( :APP_USER ) ||
+        '}' );*/
+    commit;
+  else
+  null;
+  /*
+l_id:= apex_mail.send (
+        p_to                 => l_user_email_id,
+        p_from      => 'hfc.support@jmfl.com',
+        p_cc        => 'mifin.support@jmfl.com',
+        p_template_static_id => 'BANK_BRANCH_DETAILS',
+        p_placeholders       => '{' ||
+        '    "BANK_BRANCH":'  || apex_json.stringify( :P165_BANKBRANCH ) ||
+        '   ,"BANK_NAME":'    || apex_json.stringify( l_bank_name ) ||
+        '   ,"IFSC":'         || apex_json.stringify( :P165_IFSC ) ||
+        '   ,"MAIL_SUBJECT":' || apex_json.stringify( 'Bank Branch already exists' ) ||
+        '   ,"MICR":'         || apex_json.stringify( :P165_MICR ) ||
+        '   ,"USER_NAME":'    || apex_json.stringify( :APP_USER ) ||
+        '}' );
+        commit;*/
+  end if;
+  end if;
+end;

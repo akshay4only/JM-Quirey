@@ -1,0 +1,36 @@
+select * from qt_loandetail where prospectcode='HVIL23000041231';
+select * from qc_accounting.qt_accounting_log where PROSPECT_ID = 1000041232 order by 1 desc;
+
+select * from qc_accounting.qt_accounting_log_dtl where log_id = 1002771858;
+
+select * from qc_master.qm_account_map_hdr where scheme_id = 2000000109 and npa_stage = 'REGULAR';
+
+select *
+  from qc_master.qm_account_map_dtl
+ where map_hdr_id = 1000005130
+   and charge_id in (select charge_id
+                       from qc_accounting.qt_accounting_log_dtl
+                      where log_id = 1002771858)
+   for update;
+   SELECT max(map_dtl_id)+1 FROM QC_master.QM_ACCOUNT_MAP_DTL; --1000268628
+    select * from qc_master.qm_account_map_dtl a /*set a.active='I' */where a.map_dtl_id in (1000277366,1000277364) and a.map_hdr_id=1000005130;
+   update qc_master.qm_account_map_dtl a set a.active='I' where a.map_dtl_id in (1000277366,1000277364) and a.map_hdr_id=1000005130;
+select * from qc_master.qm_loancharge where chargeid = 1000010117;
+select * from qc_accounting.qt_accounting_dtl where charge_id in (1000100063,1000100065);
+
+select maphdr.event_name,maphdr.npa_stage,
+       sum(decode(upper(mapdtl.trans_type),'CR',lg.charge_amount,0))CR_AMT,
+       sum(decode(upper(mapdtl.trans_type),'DR',lg.charge_amount,0))DR_AMT,
+       sum(decode(upper(mapdtl.trans_type),'CR',lg.charge_amount,0)) - 
+       sum(decode(upper(mapdtl.trans_type),'DR',lg.charge_amount,0))DIFF_CR_DR 
+from qc_accounting.qt_accounting_log_dtl lg,
+     qc_accounting.qm_account_map_dtl mapdtl,
+     qc_accounting.qm_account_map_hdr maphdr
+where lg.log_id =  1002771858
+and upper(maphdr.event_name) = 'FORECLOSURE'
+and upper(maphdr.npa_stage) = 'REGULAR'
+and maphdr.scheme_id =2000000109
+and mapdtl.active = 'A'
+and mapdtl.map_hdr_id = maphdr.map_hdr_id
+and mapdtl.charge_id = lg.charge_id
+group by maphdr.event_name,maphdr.npa_stage;

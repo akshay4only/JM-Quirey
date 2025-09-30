@@ -1,0 +1,10 @@
+select * from qc_user_auth.qm_user u where u.usercode ='183151';
+--SETUP  DISABLED ENABLED
+
+update  qc_user_auth.qm_user u set u.google_authentication='ENABLED' where u.usercode ='181981';
+
+select * from  qc_user_auth.qm_user u where upper(u.loginname) like upper('%shreyasr%');
+
+select * from all_tables where OWNER ='QC_USER_AUTH';
+
+select * from  QC_USER_AUTH.QT_OTP_DETAILS;

@@ -1,0 +1,53 @@
+--LMAN24000053332
+
+select * from qc_los.qt_loandetail where loansubstatusid=1000000004 order by 1 desc; --LWAR24000067617
+
+select * from qt_loandetail where prospectcode='LNIZ25000077961';--1000077962  --11,600.84
+select * from qc_accounting.qt_accounting_log where PROSPECT_ID = 1000077962 order by 1 desc; --need to take event name & log id
+-- 1003100542 DISBURSAL  REGULAR
+
+select * from qc_accounting.qt_accounting_log_dtl where log_id = 1003100542; --verify the charge id  1000000122
+
+select * from qc_master.qm_account_map_hdr where scheme_id = 2000000117 and npa_stage = 'REGULAR'; -- take out the map hdr id based on scheme id & npa stage
+-- 1000005619 DISBURSAL  1000005628 DISBURSAL PAYMENT
+select *
+  from qc_master.qm_account_map_dtl
+ where map_hdr_id = 1000005619
+   and charge_id in (select charge_id
+                       from qc_accounting.qt_accounting_log_dtl
+                      where log_id = 1003100542); -- give the map hdr id and log id  1000312270
+   for update;
+   
+   --1000000114
+   
+select *  from qc_master.qm_account_map_dtl where  map_hdr_id=1000005619 and charge_id=1000000122;
+   commit;
+   
+   SELECT max(map_dtl_id)+1 FROM QC_master.QM_ACCOUNT_MAP_DTL; --1000337717
+select * from qc_master.qm_loancharge where chargeid = 1000000111; --1000000122
+select * from qc_accounting.qm_gl where gl_id=1000000833;
+select * from qc_accounting.qt_accounting_dtl where charge_id in (1000000122) order by 1 desc;
+
+select maphdr.event_name,maphdr.npa_stage,lg.charge_amount,mapdtl.trans_type,
+--       sum(decode(upper(mapdtl.trans_type),'CR',lg.charge_amount,0))CR_AMT,
+--       sum(decode(upper(mapdtl.trans_type),'DR',lg.charge_amount,0))DR_AMT,
+--       sum(decode(upper(mapdtl.trans_type),'CR',lg.charge_amount,0)) - 
+--       sum(decode(upper(mapdtl.trans_type),'DR',lg.charge_amount,0))DIFF_CR_DR ,
+       mapdtl.charge_id
+from qc_accounting.qt_accounting_log_dtl lg,
+     qc_accounting.qm_account_map_dtl mapdtl,
+     qc_accounting.qm_account_map_hdr maphdr
+where lg.log_id =  1003100542
+and upper(maphdr.event_name) = 'DISBURSAL'
+and upper(maphdr.npa_stage) = 'REGULAR'
+and maphdr.scheme_id =2000000117
+and mapdtl.active = 'A'
+and mapdtl.map_hdr_id = maphdr.map_hdr_id
+and mapdtl.charge_id = lg.charge_id
+--group by maphdr.event_name,maphdr.npa_stage;--Application
+
+ select * from qc_accounting.qt_accounting_log_dtl lg where charge_id ='1000000111'and log_id ='1003100542'; 630000
+ select * from     qc_accounting.qm_account_map_dtl mapdtl where charge_id='1000000122' and gl_id='1000000833' and map_hdr_id='1000005619';
+  select * from    qc_accounting.qm_account_map_hdr maphdr  where scheme_id = 2000000117 and npa_stage = 'REGULAR';
+  
+  update qc_accounting.qt_accounting_log_dtl lg set lg.charge_amount='11600.84' where charge_id ='1000000111'and log_id ='1003100542'; 

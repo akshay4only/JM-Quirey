@@ -1,0 +1,21 @@
+
+
+SELECT * FROM QC_MASTER.QM_ASSETCATEGORY ac where ac.assetcategoryid='1000000015';
+SELECT * FROM QC_MASTER.QM_PROPERTYTYPE pt where pt.propertytypeid in (1000000164);
+
+select * from qc_los.qt_property pt where pt.prospect_id='1000042990'
+--
+--1000000090
+--1000000089
+--1000000088
+--1000000087
+
+select * from qc_master.qm_product;
+
+SELECT ac.assetcategoryid,ac.assetcategoryname,pt.propertytypeid,pt.propertytypename,ac.productid, p.prodname FROM QC_MASTER.QM_ASSETCATEGORY ac,qc_master.qm_product p,
+ QC_MASTER.QM_PROPERTYTYPE pt
+where p.productid=ac.productid
+and ac.assetcategoryid=pt.asset_categoryid
+order by 6,4;
+
+select * from qc_los.qt_loandetail ld where ld.prospectcode='HTRV23000042989';

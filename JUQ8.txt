@@ -1,0 +1,65 @@
+DECLARE
+    i NUMBER;
+BEGIN
+    -- Start DML statement 
+
+update qc_los.qt_prospect_x_activity set status ='1' where 
+prospectid in (1000073423) and activityid in('1000000199');
+
+	-- End DML statement
+
+    i := SQL%ROWCOUNT; -- Get the number of affected rows
+
+    -- Check if the affected row count matches the expected count
+    IF i = 1 -- Expected output
+	THEN
+        COMMIT; 
+     
+        DBMS_OUTPUT.PUT_LINE('Rows updated: ' || i);
+		DBMS_OUTPUT.PUT_LINE('COMMIT done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+   
+    ELSE
+        ROLLBACK; 
+     
+        DBMS_OUTPUT.PUT_LINE('Unexpected row count: ' || i);
+		DBMS_OUTPUT.PUT_LINE('ROLLBACK done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+    
+    END IF;
+END;
+/
+
+
+
+DECLARE
+    i NUMBER;
+BEGIN
+    -- Start DML statement 
+
+update qc_los.qt_prospect_x_activity set status ='1' where 
+prospectid in (1000073423) and activityid in('1000000179');
+
+	-- End DML statement
+
+    i := SQL%ROWCOUNT; -- Get the number of affected rows
+
+    -- Check if the affected row count matches the expected count
+    IF i = 1 -- Expected output
+	THEN
+        COMMIT; 
+     
+        DBMS_OUTPUT.PUT_LINE('Rows updated: ' || i);
+		DBMS_OUTPUT.PUT_LINE('COMMIT done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+   
+    ELSE
+        ROLLBACK; 
+     
+        DBMS_OUTPUT.PUT_LINE('Unexpected row count: ' || i);
+		DBMS_OUTPUT.PUT_LINE('ROLLBACK done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+    
+    END IF;
+END;
+/

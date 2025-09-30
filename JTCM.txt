@@ -1,0 +1,32 @@
+DECLARE
+    i NUMBER;
+BEGIN
+    -- Start DML statement 
+
+delete from qc_los.qt_documentcollection where prospectid
+in(select prospectid from qc_los.qt_loandetail where prospectcode ='LAKO24000072870')
+and id ='1001131018';
+
+	-- End DML statement
+
+    i := SQL%ROWCOUNT; -- Get the number of affected rows
+
+    -- Check if the affected row count matches the expected count
+    IF i = 1 -- Expected output
+	THEN
+        COMMIT; 
+     
+        DBMS_OUTPUT.PUT_LINE('Rows updated: ' || i);
+		DBMS_OUTPUT.PUT_LINE('COMMIT done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+   
+    ELSE
+        ROLLBACK; 
+     
+        DBMS_OUTPUT.PUT_LINE('Unexpected row count: ' || i);
+		DBMS_OUTPUT.PUT_LINE('ROLLBACK done' );
+        DBMS_OUTPUT.PUT_LINE(systimestamp );
+    
+    END IF;
+END;
+/

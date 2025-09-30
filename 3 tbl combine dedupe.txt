@@ -1,0 +1,65 @@
+WITH CombinedData AS (
+    SELECT
+        ds.SEARCHID,
+        --ds.BATCHID,
+        ds.SEARCHDATETIME,
+        --ds.TOTALRECORDS,
+        --ds.LOGINID AS SEARCH_LOGINID,
+        ds.MATCHEDBY,
+        ds.MATCHEDDATE,
+        --hdm.CUSTID,
+        --hdm.INTERNALCUSTID,
+        --hdm.EXTERNALCUSTID,
+        --hdm.RULEID,
+        hdm.SCORE AS MATCH_SCORE,
+        --hdm.ORACLETEXT_SCORE,
+        --hdm.SOURCE_KEY AS MATCH_SOURCE_KEY,
+        qnch.ACTUAL_CUSTID,
+        qnch.FNAME ||' '||
+        qnch.LNAME as "Applicant Name",
+        qnch.DOB,
+        qnch.MOBILE_NO,
+        --qnch.EMAIL,
+        qnch.SCORE AS CUSTOMER_SCORE,
+        qr.RULENAME "Dedupe Rule"
+    FROM
+        QC_DEDUPE.DEDUPESEARCH ds
+    INNER JOIN
+        QC_DEDUPE.H_DEDUPE_MATCHEDRECORD hdm ON ds.SEARCHID = hdm.SEARCHID
+    INNER JOIN
+        QC_DEDUPE.QT_NEWCUSTOMER_HIST qnch ON hdm.CUSTID = qnch.CUSTID
+    LEFT JOIN
+        QC_DEDUPE.QM_RULES qr ON hdm.RULEID = qr.RULEID
+    WHERE qnch.ACTUAL_CUSTID LIKE 'CN0000%'
+),
+LoanCustomerData AS (
+    SELECT
+        ID,
+        APPLICANTCODE,
+        NEW_APPLICANTCODE,
+        CASE
+            WHEN APPLICANTCODE != NEW_APPLICANTCODE THEN 'Y'
+            ELSE 'N'
+        END AS DEDUP_MARKED,
+        PROSPECTID  -- Include PROSPECTID
+    FROM
+        qc_los.qt_loan_x_customer
+),
+LoanDetailData AS (  -- New CTE for Loan Detail Data
+    SELECT
+        PROSPECTID,
+        PROSPECTCODE
+    FROM
+        qc_los.qt_loandetail
+)
+SELECT
+    cd.*,
+    lcd.DEDUP_MARKED AS LOAN_DEDUP_MARKED,
+    ldd.PROSPECTCODE , -- Add PROSPECTCODE
+    lcd.new_applicantcode
+FROM
+    CombinedData cd
+LEFT JOIN
+    LoanCustomerData lcd ON cd.ACTUAL_CUSTID = lcd.APPLICANTCODE
+LEFT JOIN  -- Join with LoanDetailData
+    LoanDetailData ldd ON lcd.PROSPECTID = ldd.PROSPECTID order by 1 desc;

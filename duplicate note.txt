@@ -1,0 +1,2 @@
+select regexp_replace( ntp.remarks,'(.*1)\1','\1') from qc_los.qt_notepad ntp where ntp.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='HPIT24000073586')

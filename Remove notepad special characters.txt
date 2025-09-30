@@ -1,0 +1,22 @@
+select ntp.remarks
+from qc_los.qt_notepad ntp where ntp.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode in (
+'HPIT24000072347','HPIT24000072379','HPIT24000072530','HPIT24000072846'));
+
+select regexp_replace(regexp_replace(regexp_replace(ntp.remarks,'<(span |p |b|ul|o:p|table|tbody|tr|td|li|u|!-).*?>',''),'<(/|/span|/o:p|/li|/u|/td|/tr|/tbody|/table).?>',''),'@@|\^','')  
+from qc_los.qt_notepad ntp where ntp.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode in (
+'HPIT24000072347','HPIT24000072379','HPIT24000072530','HPIT24000072846'));
+
+update qc_los.qt_notepad ntp set ntp.remarks= regexp_replace(regexp_replace(regexp_replace(ntp.remarks,'<(span |p |b|ul|o:p|table|tbody|tr|td|li|u|!-).*?>',''),'<(/|/span|/o:p|/li|/u|/td|/tr|/tbody|/table).?>',''),'@@|\^','') 
+where ntp.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode in (
+'HPIT24000072347','HPIT24000072379','HPIT24000072530','HPIT24000072846'));
+
+update qc_los.qt_notepad ntp set ntp.remarks= regexp_replace(regexp_replace(regexp_replace(ntp.remarks,'<(span |p |b|ul|o:p|table|tbody|tr|td|li|u|!-).*?>',''),'<(/|/span|/o:p|/li|/u|/td|/tr|/tbody|/table).?>',''),'@@|\^','') 
+where ntp.notepadid in (
+select ntp.notepadid from  qc_los.qt_notepad ntp order by ntp.create_date desc fetch first 1000 rows only);
+
+update qc_los.qt_notepad ntp set ntp.remarks= regexp_replace(regexp_replace(regexp_replace(ntp.remarks,'<(span |p |b|ul|o:p|table|tbody|tr|td|li|u|!-).*?>',''),'<(/|/span|/o:p|/li|/u|/td|/tr|/tbody|/table).?>',''),'@@|\^','') 
+where ntp.notepadid in (
+select ntp.notepadid from  qc_los.qt_notepad ntp order by ntp.update_date desc fetch first 1000 rows only);

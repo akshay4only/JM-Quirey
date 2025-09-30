@@ -1,0 +1,404 @@
+SELECT * FROM qc_los.QT_LOANDETAIL LD WHERE LD.PROSPECTCODE = 'HVAL24000073559' FOR UPDATE; --1000001118
+SELECT *
+  FROM qc_lms.QT_LOANCHARGE LC
+ WHERE LC.PROSPECT_ID = 1000073560 ;--FOR UPDATE;--1001644122 -8260
+ 
+select 550000-12509-684-118-12980-6490-3245-1070-517683-2950+2950+2950 FROM DUAL;
+ 
+SELECT * FROM QM_LOANCHARGE L WHERE L.CHARGEID IN (1000002100);
+ 
+SELECT * FROM qc_los.QT_DISBURSAL D WHERE D.PROSPECTID = 1000073560;
+-- replace the disbursal id 
+SELECT * FROM QC_LOS.QT_DISBURSAL_DTL D WHERE D.DISBURSALID = 1000058976;
+select * from qc_los.qt_disbursal_payment dp where dp.prospectid=1000073560;
+SELECT * FROM qc_los.QT_STRUCTURED_TRANCHE ST WHERE ST.PROSPECTID = 1000073560;
+SELECT * FROM qc_los.QT_TRANCHE_DTL D WHERE D.PROSPECTID = 1000073560;
+SELECT * FROM qc_lms.QT_RESCHEDULEAGR R WHERE R.AGREEMENT_ID = 1000073560;
+SELECT *
+  FROM qc_los.QT_PMNTSCH P
+ WHERE P.PROSPECTID = 1000073560
+ ORDER BY P.DUE_DATE;
+SELECT *
+  FROM QC_AMORT.QT_AMORTIZE_CHRG AC
+ WHERE AC.AGREEMENT_ID = 1000073560
+ ORDER BY AC.AMORT_END_DATE;
+SELECT *
+  FROM qc_lms.QT_LOAN_CHARGE_TRANS_DTL LCD
+ WHERE LCD.LOANCHARGE_ID IN
+       (SELECT LC.LOANCHARGE_ID
+          FROM qc_lms.QT_LOANCHARGE LC
+         WHERE LC.PROSPECT_ID = 1000073560);
+         
+ 
+SELECT *
+  FROM QC_ACCOUNTING.QT_ACCOUNTING_DTL AD
+ WHERE AD.PROSPECT_ID = 1000073560
+ ORDER BY 1 DESC;
+SELECT *
+  FROM QC_ACCOUNTING.QT_ACCOUNTING AD
+ WHERE AD.PROSPECT_ID = 1000073560;
+
+select *
+  FROM qc_los.QT_PROSPECT_X_ACTIVITY X
+ WHERE PROSPECTID = 1000073560
+   and x.activityid in (1000000188, 1000000189,1000000182);
+   for update; --ch
+
+--1100001184 
+
+SELECT ACTIVITYID,
+       (SELECT ACTIONID
+          FROM qc_master.QM_WORKFLOW_X_PRODUCT
+         WHERE ACTIVITYID = X.ACTIVITYID) ACTIONID,
+       (SELECT SEQNO
+          FROM qc_master.QM_WORKFLOW_X_PRODUCT
+         WHERE ACTIVITYID = X.ACTIVITYID) SEQNO,
+       (SELECT MENU_NAME
+          FROM qc_user_auth.QM_ACTION
+         WHERE ACTION_ID = (SELECT ACTIONID
+                              FROM qc_master.QM_WORKFLOW_X_PRODUCT
+                             WHERE ACTIVITYID = X.ACTIVITYID)) ACTIVITYNAME,
+       STATUS,
+       (SELECT STATUSNAME
+          FROM qc_master.QM_WORKFLOW_STATUS
+         WHERE STATUSID = STATUS) STATUSNAME,
+       (SELECT LOGINNAME
+          FROM qc_user_auth.QM_USER
+         WHERE USERID = X.UPDATEDBY) UPDATEDBY,
+       TO_CHAR(UPDATEDDATE, 'DD-MON-YYYY') UPDATEDDATE,
+       TO_CHAR(UPDATEDDATETIME, 'DD-MON-YYYY HH24:MI:SS') UPDATEDDATETIME
+  FROM qc_los.QT_PROSPECT_X_ACTIVITY X
+ WHERE PROSPECTID = 1000073560
+   AND ACTIVITYID IN (SELECT ACTIVITYID
+                        FROM qc_master.QM_WORKFLOW_X_PRODUCT
+                       WHERE SHOW_ON_SCREEN = 'Y'
+                         AND AUTO_CLOSED = 'N')
+   AND ENTITYID = NVL(null, 1000000001)
+ ORDER BY SEQNO;
+
+DECLARE
+
+  V_PROSPECTCODE VARCHAR2(20) := 'HVAL24000073559';
+  V_PROSPECTID   VARCHAR2(10) := 1000073560;
+
+BEGIN
+
+  SELECT PROSPECTID
+    INTO V_PROSPECTID
+    FROM QC_LOS.QT_LOANDETAIL
+   WHERE PROSPECTCODE = V_PROSPECTCODE;
+
+  UPDATE qc_los.qt_loandetaiL
+     SET LOANSUBSTATUSID            = 1000000002,
+         FROM_GO_BACK               = 'Y',
+         DISBURSED_AMOUNT           = 0,
+         EMI_PRIN_RECOVERY_OPTED    = NULL,
+         EMI_PRIN_RECOVERY_OPTED_ON = NULL
+   WHERE prospectid = V_PROSPECTID;
+
+  update qc_los.qt_tranche_dtl td
+     set tranche_disbursed = 'N', DISBURSALID = NULL
+   where prospectid = V_PROSPECTID;
+  --and td.disbursalid = 1000105895;
+
+  DELETE FROM QT_DISBURSAL D
+   WHERE D.PROSPECTID = V_PROSPECTID;
+     --AND D.DISBURSALID = 1000058976;
+
+  DELETE FROM QC_LOS.QT_DISBURSAL_DTL DD WHERE DD.DISBURSALID = 1000058976;
+
+  --delete from qc_los.qt_disbursal_payment where prospectid= V_PROSPECTID; 
+
+  UPDATE QC_LOS.QT_PROSPECT_X_ACTIVITY
+     SET STATUS          = 1,
+         UPDATEDBY       = NULL,
+         UPDATEDDATE     = NULL,
+         UPDATEDDATETIME = NULL
+   where prospectid = V_PROSPECTID
+     AND ACTIVITYID = 1000000188;
+
+  UPDATE QC_LOS.QT_PROSPECT_X_ACTIVITY
+     SET STATUS          = 0,
+         UPDATEDBY       = NULL,
+         UPDATEDDATE     = NULL,
+         UPDATEDDATETIME = NULL
+   where prospectid = V_PROSPECTID
+     AND ACTIVITYID = 1000000189;
+     
+--   UPDATE QC_LOS.QT_PROSPECT_X_ACTIVITY
+--     SET STATUS          = 1,
+--         UPDATEDBY       = NULL,
+--         UPDATEDDATE     = NULL,
+--         UPDATEDDATETIME = NULL
+--   where prospectid = V_PROSPECTID
+--     AND ACTIVITYID = 1000000182;
+-- replace loancharge id with charge to be reversed
+  UPDATE QC_LMS.QT_LOANCHARGE A
+     SET CHARGE_BAL_AMOUNT  = TOTAL_CHARGE,
+         CHARGE_STATUS      = '0',
+         BAL_SERVICE_TAX    = SERVICE_TAX,
+         BAL_E_SERVICE_TAX  = E_SERVICE_TAX,
+         BAL_NET_CHARGE_AMT = TOTAL_CHARGE
+   where prospect_id = V_PROSPECTID
+   and loancharge_id in (1001969463,1001969465);
+-- replace loan charge id of disbursed amt
+  DELETE FROM QC_LMS.QT_LOANCHARGE
+   WHERE prospect_id = V_PROSPECTID
+     AND CHARGE_ID IN (1000000003)
+     and loancharge_id = 1001983340;
+
+  DELETE FROM QC_LMS.QT_LOAN_CHARGE_TRANS_DTL
+   WHERE TRANS_TYPE = 'DISBURSAL'
+     AND TRANS_PROC_ID IN (1000058976);
+
+  DELETE FROM QC_LOS.QT_RESCHEDULEAGR WHERE AGREEMENT_ID = V_PROSPECTID;
+  --and rescheduleagr_id = 1000050097;
+
+  DELETE FROM QC_ACCOUNTING.QT_ACCOUNTING
+   WHERE PROSPECT_ID = V_PROSPECTID
+     AND EVENT_NAME IN ('DISBURSAL')
+     and source_id = 1000058976;
+
+  DELETE FROM QC_ACCOUNTING.QT_ACCOUNTING_DTL
+   WHERE PROSPECT_ID = V_PROSPECTID
+     AND EVENT_NAME IN ('DISBURSAL')
+     and source_id = 1000058976;
+
+  DELETE from QC_AMORT.Qt_amortize_chrg where AGREEMENT_ID = V_PROSPECTID;
+
+  /*  INSERT INTO QC_AMORT.Qt_amortize_chrg
+  (amort_id,
+   agreement_id,
+   chrg_id,
+   amort_start_date,
+   amort_end_date,
+   chrg_amt,
+   prindays,
+   business_date,
+   amortized_flag,
+   posted_flag,
+   activity_id,
+   rescheduleagr_id)
+  SELECT amort_id,
+         agreement_id,
+         chrg_id,
+         amort_start_date,
+         amort_end_date,
+         chrg_amt,
+         prindays,
+         business_date,
+         NULL,
+         posted_flag,
+         activity_id,
+         rescheduleagr_id
+    FROM QC_AMORT.QT_AMORTIZE_CHRG_HIST AH
+   WHERE AH.AGREEMENT_ID = V_PROSPECTID;*/
+
+  DELETE FROM QT_PMNTSCH P WHERE P.PROSPECTID = V_PROSPECTID;
+
+  /*  INSERT INTO QT_PMNTSCH
+  (loan_amt,
+   interest_rate,
+   tenure,
+   instalment_no,
+   emi_amt,
+   interest,
+   principal,
+   bal_prin,
+   created_by,
+   created_datetime,
+   adjusted_amt,
+   due_date,
+   pv,
+   excess_interest,
+   prospectid,
+   active,
+   create_date,
+   update_date,
+   billing_status,
+   adv_emi_status,
+   emi_status,
+   op_prin,
+   topup_amount,
+   topup_date,
+   update_datetime,
+   rescheduleagr_id,
+   interest_capitalized,
+   interest_capital_posted)
+  SELECT loan_amt,
+         interest_rate,
+         tenure,
+         instalment_no,
+         emi_amt,
+         interest,
+         principal,
+         bal_prin,
+         created_by,
+         created_datetime,
+         adjusted_amt,
+         due_date,
+         pv,
+         excess_interest,
+         prospectid,
+         active,
+         create_date,
+         update_date,
+         billing_status,
+         adv_emi_status,
+         emi_status,
+         op_prin,
+         topup_amount,
+         topup_date,
+         update_datetime,
+         rescheduleagr_id,
+         interest_capitalized,
+         interest_capital_posted
+    FROM QH_PMNTSCH P
+   WHERE P.PROSPECTID = V_PROSPECTID
+     AND P.HISTID = (SELECT MAX(PH.HISTID)
+                       FROM QH_PMNTSCH PH
+                      WHERE PH.PROSPECTID = V_PROSPECTID);*/
+END;
+
+SELECT *
+  FROM (select TO_CHAR(PROSPECTID) || ' - ' || PROSPECTCODE || ' - LCID -  ' ||
+               loancharge_id PRS
+          from (select data.*,
+                       (total_charge - nvl(charge_bal_amount, 0) -
+                       nvl(alloc_amt, 0) - nvl(morat_excess_generated, 0)) diff2
+                  from (select prospectcode,
+                               prospectid,
+                               loancharge_id,
+                               prospect_id,
+                               charge_id,
+                               chargename,
+                               charge_value_date,
+                               total_charge,
+                               charge_bal_amount,
+                               alloc_amt,
+                               morat_excess_generated,
+                               (total_charge - nvl(charge_bal_amount, 0) -
+                               nvl(alloc_amt, 0)) diff,
+                               otc_amt
+                          from (select l.prospectcode,
+                                       l.prospectid,
+                                       c.loancharge_id,
+                                       c.prospect_id,
+                                       c.charge_id,
+                                       lc.chargename,
+                                       c.charge_value_date,
+                                       c.total_charge,
+                                       c.charge_bal_amount,
+                                       (SELECT SUM(D.ALLOCATED_AMOUNT)
+                                          FROM QC_LMS.QT_LOAN_CHARGE_TRANS_DTL D
+                                         WHERE D.LOANCHARGE_ID = C.LOANCHARGE_ID
+                                           AND D.INSTR_STATUS = 'CL'
+                                           AND D.AUTH_STATUS = 'A'
+                                        /* AND NOT EXISTS
+                                                                                      (SELECT 1
+                                                                                               FROM QC_LMS.QT_OTC_IMD IM
+                                                                                              WHERE IM.OTC_IMD_ID =
+                                                                                                    D.TRANS_PROC_ID
+                                                                                                AND IM.TRANS_TYPE =
+                                                                                                    D.TRANS_TYPE
+                                                                                                AND IM.CANCELAUTHDT >
+                                                                                                    '07-Jan-2020'
+                                                                                                AND IM.INSTRUMENT_STATUS <> 'CL')
+                                                                                        AND NOT EXISTS
+                                                                                      (SELECT 1
+                                                                                               FROM QC_LMS.QT_LOANCHARGE LL,
+                                                                                                    QC_LMS.QT_OTC_IMD    IM
+                                                                                              WHERE IM.OTC_IMD_ID =
+                                                                                                    LL.ACTIVITY_ID
+                                                                                                AND IM.TRANS_TYPE =
+                                                                                                    LL.ACTIVITY_NAME
+                                                                                                AND LL.CHARGE_ID NOT IN
+                                                                                                    (1000000105)
+                                                                                                AND IM.INSTRUMENT_STATUS <> 'CL'
+                                                                                                AND IM.CANCELAUTHDT >
+                                                                                                    '07-Jan-2020'
+                                                                                                AND LL.LOANCHARGE_ID =
+                                                                                                    D.ALLOC_LOANCHARGE_ID)
+                                                                                           -- BEGIN
+                                                                                        AND NOT EXISTS
+                                                                                      (SELECT 1
+                                                                                               FROM QC_LMS.QT_INSTR_ENTRY_DTL IED,
+                                                                                                    QC_LMS.QM_PARAMETERS      P,
+                                                                                                    QC_LMS.QM_PARAMETERS_DTL  PD
+                                                                                              WHERE PD.PARAM_ID =
+                                                                                                    P.PARAM_ID
+                                                                                                AND P.PARAM_TYPE =
+                                                                                                    'INSTR_MODE'
+                                                                                                AND PD.ATTRIBUTE3 =
+                                                                                                    D.TRANS_TYPE
+                                                                                                AND IED.INSTRUMENT_TYPE =
+                                                                                                    PD.ATTRIBUTE1
+                                                                                                AND IED.INSTR_ENTRY_DTL_ID =
+                                                                                                    D.TRANS_PROC_ID
+                                                                                                AND IED.CANCEL_AUTHORDT >
+                                                                                                    '07-Jan-2020'
+                                                                                                AND IED.INSTRUMENT_STATUS <> 'CL')
+                                                                                        AND NOT EXISTS
+                                                                                      (SELECT 1
+                                                                                               FROM QC_LMS.QT_LOANCHARGE      LL,
+                                                                                                    QC_LMS.QT_INSTR_ENTRY_DTL IED,
+                                                                                                    QC_LMS.QM_PARAMETERS      P,
+                                                                                                    QC_LMS.QM_PARAMETERS_DTL  PD
+                                                                                              WHERE PD.PARAM_ID =
+                                                                                                    P.PARAM_ID
+                                                                                                AND P.PARAM_TYPE =
+                                                                                                    'INSTR_MODE'
+                                                                                                AND PD.ATTRIBUTE3 =
+                                                                                                    LL.ACTIVITY_NAME
+                                                                                                AND IED.INSTRUMENT_TYPE =
+                                                                                                    PD.ATTRIBUTE1
+                                                                                                AND IED.INSTR_ENTRY_DTL_ID =
+                                                                                                    LL.ACTIVITY_ID
+                                                                                                AND IED.CANCEL_AUTHORDT >
+                                                                                                    '07-Jan-2020'
+                                                                                                AND IED.INSTRUMENT_STATUS <> 'CL'
+                                                                                                AND LL.LOANCHARGE_ID =
+                                                                                                    D.ALLOC_LOANCHARGE_ID)*/
+                                        -- END
+                                        ) alloc_amt,
+                                       (select sum(distinct lll.total_charge)
+                                          from qc_lms.qt_loancharge lll
+                                         where lll.prospect_id = c.prospect_id
+                                           and lll.activity_id = c.activity_id
+                                           and lll.activity_name =
+                                               c.activity_name
+                                           and lll.trxn_id is not null) morat_excess_generated,
+                                       (SELECT im.receipt_amount
+                                          FROM Qc_LMS.Qt_Otc_Imd IM
+                                         WHERE IM.OTC_IMD_ID = c.ACTIVITY_ID
+                                           and im.prospect_id = c.prospect_id
+                                           AND IM.TRANS_TYPE = c.ACTIVITY_NAME
+                                           and c.activity_name in ('OTC')
+                                           and c.charge_id in
+                                               (1000000104, 1000010104)
+                                           AND IM.INSTRUMENT_STATUS = 'CL') otc_amt
+                                  from Qc_LMS.qt_loancharge    c,
+                                       Qc_LOS.qt_loandetail    l,
+                                       qc_master.qm_loancharge lc
+                                 where c.charge_id not in
+                                       (1000000114, 1000003002)
+                                   AND C.PROSPECT_ID = 1000073560
+                                   and c.charge_id = lc.chargeid
+                                      /* and l.loansubstatusid in
+                                                                                  (1000000004, 1000000010, 1000000011,
+                                                                                   1000000006, 1000000007, 1000000012)*/
+                                   and c.trxn_id is null
+                                   and c.prospect_id = l.prospectid
+                                      --and c.prospect_id =1000005555
+                                   and c.total_charge > 0
+                                      -- and c.charge_value_date > '01-jan-2019'
+                                   and c.status = 'A')
+                         where (total_charge - nvl(charge_bal_amount, 0) -
+                               nvl(alloc_amt, 0)) <> 0) data
+                 where (total_charge - nvl(charge_bal_amount, 0) -
+                       nvl(alloc_amt, 0) - nvl(morat_excess_generated, 0)) <> 0)
+         where case when charge_id in (1000000104, 1000010104) then(nvl(morat_excess_generated, 0) - nvl(otc_amt, 0)) else 1 end > 0
+         GROUP BY PROSPECTID, PROSPECTCODE, loancharge_id
+         ORDER BY PROSPECTID, PROSPECTCODE, loancharge_id) DATA;
+         
+        

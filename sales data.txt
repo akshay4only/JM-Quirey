@@ -1,0 +1,6 @@
+    
+      select am.agentmastername,count(ld.prospectcode),sum(ld.sanctioned_amount) as "scanction amt",
+      (sum(ld.sanctioned_amount)*0.02) as Incentive
+      from qc_los.qt_loandetail ld, qc_master.qm_agentmaster am 
+where am.agentmasterid=ld.originationname and ld.loansubstatusid='1000000004'
+group by am.agentmastername order by count(ld.prospectcode) desc;

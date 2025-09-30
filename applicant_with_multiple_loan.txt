@@ -1,0 +1,45 @@
+
+SELECT
+    "Applicant Name",
+    prospectcode,
+    branch,
+    DENSE_RANK()
+    OVER(PARTITION BY "Applicant Name"
+         ORDER BY
+             prospectcode
+    ) AS prospect_Rank
+FROM
+    (
+        SELECT
+            (
+                SELECT
+                    replace(TRIM(am.fname
+                                 || ' '
+                                 || am.mname
+                                 || ' '
+                                 || am.lname),
+                            '  ',
+                            ' ')
+                FROM
+                    qc_los.qt_applicantmaster am
+                WHERE
+                    am.applicantid = l.customerid
+            ) AS "Applicant Name",
+            l.prospectcode,
+            (
+                SELECT
+                    substr(g.geoname, 5)
+                FROM
+                    qc_master.qm_geo g
+                WHERE
+                    g.geoid = l.branch
+            ) AS branch
+        FROM
+            qc_los.qt_loandetail l
+        WHERE
+            l.customerid IN (select ld.customerid from qc_los.qt_loandetail ld group by ld.customerid having count(ld.customerid) >1
+            )
+        ORDER BY
+            1,
+            3
+    );

@@ -1,0 +1,11 @@
+select
+ld.prospectcode,
+u.usercode,
+u.userfname ||' '|| u.usermname || ' '|| u.usermname as name,
+u.loginname,
+  "A1"."APPROVELEVEL"           "APPROVELEVEL"
+from  qc_los.qt_loandetail ld ,"QC_LOS"."QT_CREDITDECISIONDETAIL" "A1",qc_user_auth.qm_user u 
+where ld.prospectid=A1.prospectid
+and "A1"."USER" = u.userid
+and "A1"."APPROVELEVEL"  = 1
+and ld.prospectcode in ( select Lan_no from qc_master.ashok_temp);

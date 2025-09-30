@@ -1,0 +1,18 @@
+select * from qc_los.qt_loandetail ld where ld.prospectcode ='HMYS23000050319';
+
+
+
+select * from qc_los.qt_deviation dev where dev.prospectid='1000050320' and dev.id='1000661959';
+
+
+update qc_los.qt_deviation dev set dev.deviationresultid='1000000001' where dev.prospectid='1000070868' and dev.id =1001031422;
+
+select * from qc_master.qm_deviationstatus;
+
+select * from qc_master.qm_deviation_category;
+
+select * from qc_master.qm_deviationresult;
+
+select * from qc_master.QM_DEVIATION_RESULT
+
+select * from all_tables where owner ='QC_MASTER' and table_name like '%DEVIATION%'
