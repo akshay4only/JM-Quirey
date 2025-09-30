@@ -1,0 +1,12 @@
+select * from qc_los.qt_loandetail where prospectcode='LHYD25000088003'; --30-03-25
+select * from qc_los.qt_disb_payment_clearance where prospect_id=1000081050 order by clr_date;
+select * from qc_los.qt_disb_payment_clearance_dtl where prospect_id=1000081050;
+select * from qc_lms.qt_rescheduleagr where agreement_id=1000081050;
+select * from qc_lms.qt_int_rates_slab_resch  where prospectid=1000081050;
+select * from qc_los.qt_pmntsch where prospectid=1000081050 order by due_date;
+select * from qc_los.qt_disbursal where prospectid=1000081050;
+select * from qc_los.qt_tranche_dtl where prospectid=1000081050;
+select * from qc_los.qt_structured_tranche where prospectid=1000081050;
+select * from qc_amort.qt_amortize_chrg where agreement_id=1000081050 order by amort_start_date;
+select * from qc_lms.qt_application_log where log_type='ERROR' and log_desc like'%1000081050%' order by 1 desc;
+select * from all_source a where upper(a.text) like '%START DATE MUST BE THE SAME AS DISBURSAL DATE%';

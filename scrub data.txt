@@ -1,0 +1,5 @@
+select am.applicantcode,am.applicantid,ld.prospectcode
+,am.fname,am.mname,am.lname,am.applicanttype,am.panno
+from qc_los.qt_applicantmaster am left join 
+qc_los.qt_loan_x_customer lxc on lxc.applicantid=am.applicantid left join qc_los.qt_loandetail ld 
+on ld.prospectid=lxc.prospectid;

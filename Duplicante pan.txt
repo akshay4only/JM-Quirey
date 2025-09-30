@@ -1,0 +1,15 @@
+select am.applicantcode,am.panno,lxc.prospectid,ld.prospectcode, 
+(select ls.loanstatusname from qc_master.qm_loan_status ls where ls.loanstatusid= ld.loansubstatusid) as loan_status
+from qc_los.qt_applicantmaster am left join qc_los.qt_loan_x_customer lxc
+on lxc.applicantcode =am.applicantcode 
+left join qc_los.qt_loandetail ld on ld.prospectid=lxc.prospectid
+where am.panno in (
+    SELECT
+            am.panno
+            
+        FROM
+            qc_los.qt_applicantmaster am
+        GROUP BY
+            am.panno
+        HAVING
+            COUNT(*) > 1) order by am.panno,am.applicantcode;

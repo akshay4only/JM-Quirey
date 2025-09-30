@@ -1,0 +1,10 @@
+
+select * from qc_lms.qt_rescheduleagr where agreement_id='1000089315' ;--07-05-25
+
+update qc_lms.qt_rescheduleagr set reschedule_eff_date='07-05-25'  where agreement_id='1000089315'
+and rescheduleagr_id='1000107672';
+
+select * from qc_lms.qt_int_rates_slab_resch where prospectid='1000089315' and col_rescheduleagr_id='1000107672';
+
+update qc_lms.qt_int_rates_slab_resch set reschedule_effective_date='07-05-25' where prospectid='1000089315' and col_rescheduleagr_id='1000107672';
+

@@ -1,0 +1,21 @@
+SELECT * FRoM QC_LMS.QT_BATCHDTL d where d.batch_id=1000021229
+  --d.prospect_id=1000070303 and 
+ and D.INSTRUMENT_STATUS not in ('CL', 'C','B','CP') ORDER BY 1 deSC;
+SELECT * from qc_lms.qt_application_log l where l.log_desc
+like '%1000070303%' order by 1 desc;
+SELECT * FRoM qc_lms.qt_batchHDR d where d.batch_id=1000021229;
+and d.c_auth_status = 'A' ; 
+select * from 
+select * from   qc_accounting.qt_accounting_log a where a.prospect_id=1000070303 order by 1 desc;
+--1000836770  --1000080768  --1000299456
+SELECT * FRoM qc_lms.qt_batchdtl d where d.batch_id=1000021229
+--and d.prospect_id=1000070303
+and exists (select 1 from qc_accounting.qt_accounting_dtl ad
+where ad.prospect_id=d.prospect_id
+and ad.source_id=d.batch_dtl_id
+and ad.event_name='CLEARANCE')
+and exists (select 1 from qc_lms.qt_loan_charge_trans_dtl lcd
+where lcd.trans_proc_id= d.trans_proc_id
+and lcd.auth_status='A'
+and lcd.instr_status='CL'
+and lcd.trans_type=d.instrument_type);

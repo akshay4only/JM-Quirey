@@ -1,0 +1,17 @@
+select * from qt_batch_upload order by 1 desc;
+select * from qt_batch_upload_issues where upload_id=1000004176;
+select * from qt_batch_upload_temp_otcimd where upload_id=1000004176;
+select * from qc_los.qt_loandetail where prospectcode='HJPR21000013879';
+select * from qc_lms.qt_rescheduleagr where agreement_id=1000013880 order by 1 desc;
+select * from qc_los.qt_disb_payment_clearance where prospect_id=1000013880;
+select * from qc_lms.qt_rescheduleagr where auth_status not in ('A','R') and agreement_id in 
+(select prospectid from qc_los.qt_loandetail where prospectcode in
+(select prospect_code from qt_batch_upload_temp_otcimd where upload_id=1000004174));
+
+select * from qc_los.qt_disb_payment_clearance where auth_status<>'A' and prospect_id in 
+(select prospectid from qc_los.qt_loandetail where prospectcode in
+(select prospect_code from qt_batch_upload_temp_otcimd where upload_id=1000004174));
+
+select * from qc_lms.qt_foreclosure where auth_status<>'A' and prospect_id in 
+(select prospectid from qc_los.qt_loandetail where prospectcode in
+(select prospect_code from qt_batch_upload_temp_otcimd where upload_id=1000004174));

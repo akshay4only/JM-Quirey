@@ -1,0 +1,90 @@
+with mobData as (    
+    SELECT
+    APPLICANTID,
+    MAX(CASE WHEN ADDRESSTYPE = 1000000001 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END) AS Mobile_1000000001,
+    MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END) AS Mobile_1000000002,
+    MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END) AS Mobile_1000000003,
+    COALESCE(
+        MAX(CASE WHEN ADDRESSTYPE = 1000000001 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS = 'Y' THEN MOBILE ELSE NULL END)
+    ) AS Preferred_Mobile,
+    COALESCE(
+        MAX(CASE WHEN ADDRESSTYPE = 1000000001 AND MAILINGADDRESS = 'Y' THEN ZIPCODE ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS = 'Y' THEN ZIPCODE ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS = 'Y' THEN ZIPCODE ELSE NULL END)
+    ) AS Pincode,
+      COALESCE(
+        MAX(CASE WHEN ADDRESSTYPE = 1000000001 AND MAILINGADDRESS = 'Y' THEN EMAIL ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS = 'Y' THEN EMAIL ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS = 'Y' THEN EMAIL ELSE NULL END)
+    ) AS PERSONALEMAIL,
+    COALESCE(
+        
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS != 'Y' THEN ZIPCODE ELSE NULL END),
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS != 'Y' THEN ZIPCODE ELSE NULL END)
+    )CORRESPONDENCEADDRESSZIPCODE,
+     COALESCE(
+        
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS != 'Y' THEN (
+        select sm.statemastername from qc_master.qm_statemaster sm where sm.statemasterid=STATE) ELSE NULL END),
+        
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS != 'Y' THEN (
+        select sm.statemastername from qc_master.qm_statemaster sm where sm.statemasterid=STATE) ELSE NULL END)
+    )CORRESPONDENCEADDRESSSTATE,
+    COALESCE(
+        
+        MAX(CASE WHEN ADDRESSTYPE = 1000000002 AND MAILINGADDRESS != 'Y' THEN (
+        select  cm.citymastername from qc_master.qm_citymaster cm where  cm.citymasterid=CITY) ELSE NULL END),
+        
+        MAX(CASE WHEN ADDRESSTYPE = 1000000003 AND MAILINGADDRESS != 'Y' THEN (
+        select  cm.citymastername from qc_master.qm_citymaster cm where cm.citymasterid=CITY) ELSE NULL END)
+    )CORRESPONDENCEADDRESSCITY
+FROM
+    qc_los.qt_applicantaddress
+GROUP BY
+    APPLICANTID ),
+    MSME_prod as (
+select p.productid,p.prodname from qc_master.qm_product p where p.parentprodid is NULL  and p.active ='A'
+and p.productid not in (2000000050,2000000057) )
+
+SELECT
+    
+    ROW_NUMBER() OVER (PARTITION BY ld.prospectcode ORDER BY CASE WHEN (SELECT at.applicanttypename FROM qc_master.qm_applicanttype at WHERE at.applicanttypeid = am.applicanttype) = 'APPLICANT' THEN 1 ELSE 2 END, (SELECT at.applicanttypename FROM qc_master.qm_applicanttype at WHERE at.applicanttypeid = am.applicanttype)) AS RECORDIDENTIFIER,
+    'Mifin' AS SOURCESYSTEMNAME,
+    am.applicantcode SOURCESYSTEMCUSTOMERCODE,
+    --am.applicantid,
+    ld.prospectcode APPLICATIONREFNUMBER,
+    am.fname FIRSTNAME,
+    am.mname MIDDLENAME,
+    am.lname LASTNAME,
+    am.dob DATEOFBIRTH,
+    am.nationality NATIONALITY,
+    am.panno PAN,
+    md.Preferred_Mobile PERSONALMOBILENUMBER,
+    md.PERSONALEMAIL PERSONALEMAIL,
+    
+    am.passportno PASSPORTNUMBER,
+    am.drivinglicenseno DRIVINGLICENSENUMBER,
+    NULL as DIRECTORIDENTIFICATIONNUMBER,
+    NULL as COMPANYIDENTIFICATIONNUMBER,
+    Null as LEGALENTITYIDENTIFIER,
+    am.gender,
+    md.pincode PERMANENTADDRESSZIPCODE,
+    md.CORRESPONDENCEADDRESSZIPCODE,
+    md.CORRESPONDENCEADDRESSSTATE,
+    md.CORRESPONDENCEADDRESSCITY
+    
+    --(SELECT at.applicanttypename FROM qc_master.qm_applicanttype at WHERE at.applicanttypeid = am.applicanttype) AS applicant_type,
+    
+FROM
+    qc_los.qt_applicantmaster am
+LEFT JOIN
+    qc_los.qt_loan_x_customer lxc ON lxc.applicantid = am.applicantid
+LEFT JOIN
+    mobData md on md.applicantid =am.applicantid
+LEFT JOIN
+    qc_los.qt_loandetail ld ON ld.prospectid = lxc.prospectid
+where ld.product in (select p.productid from qc_master.qm_product p where p.parentprodid is NULL  and p.active ='A'
+and p.productid not in (2000000050,2000000057))   
+order by ld.prospectcode, RECORDIDENTIFIER;

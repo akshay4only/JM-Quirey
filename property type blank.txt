@@ -1,0 +1,7 @@
+select * from qc_los.qt_property p  where p.prospect_id='1000084152' ;
+
+update qc_los.qt_property p set p.property_type='1000000576' where p.prospect_id='1000084152' ;
+
+select * from qc_master.qm_propertytype p where p.asset_categoryid='1000000015';
+
+select * from qc_master.qm_assetcategory ac where ac.productid ='2000000057';

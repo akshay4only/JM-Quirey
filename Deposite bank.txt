@@ -1,0 +1,21 @@
+select * from qc_master.qm_scheme_x_depositbank d where d.event='COLLECTION' and d.scheme='2000000063' and d.active='A';
+
+select ld.npa_stage from qc_los.qt_loandetail ld where ld.prospectcode='LKPL25000083658';
+
+select * from qc_master.qm_bankbranch bb where bb.bank_id='934';
+select * from qc_master.qm_depositbank d where d.bank_id='934' and d.account_no='10011894739';
+--1000000004
+select * from qc_master.qm_scheme_x_depositbank d where d.event='DISBURSAL' and d.scheme='2000000063' and d.active='A'
+and d.deposit_bankid='1000000004' and d.stage='REGULAR'; --1000000008
+--934
+--batch presentation
+
+--1000004034
+
+select * from qc_master.qt_batch_upload u where u.upload_id='1000004034';
+select * from qc_master.qm_batch_hdr h where h.module_id='BH00000024';
+
+select * from QC_MASTER.QT_BATCH_UPLOAD_TEMP_PAYMENT where upload_id='1000004034';
+--1000322309	10011894739
+
+select * from qc_master.qm_instrumenttype t 

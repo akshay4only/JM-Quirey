@@ -1,0 +1,15 @@
+select * from  QC_LMS.QT_LOAN_CHARGE_TRANS_DTL t where t.loancharge_id in (
+select lg.loancharge_id from qc_los.qt_loancharge lg where lg.prospect_id in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='LDIN25000080886'));
+
+update  QC_LMS.QT_LOAN_CHARGE_TRANS_DTL t set t.amt_excl_tax='20060.16' where t.loancharge_id in (
+select lg.loancharge_id from qc_los.qt_loancharge lg where lg.prospect_id in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='LDIN25000080886'))
+and t.loancharge_id ='1002196114' and t.trans_proc_id='1000064037';
+
+
+select  t.loancharge_id ,t.trans_proc_id,t.allocated_amount,t.amt_excl_tax ,t.service_tax ,t.e_service_tax,
+t.allocated_amount-(t.amt_excl_tax + t.service_tax + t.e_service_tax) as diff
+from  QC_LMS.QT_LOAN_CHARGE_TRANS_DTL t where t.loancharge_id in 
+(select lg.loancharge_id from qc_los.qt_loancharge lg where lg.charge_creation_date > '01-02-25')
+and t.allocated_amount-(t.amt_excl_tax + t.service_tax + t.e_service_tax) >0 and t.trans_type='DISBURSAL';

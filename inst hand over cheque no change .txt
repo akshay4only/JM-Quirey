@@ -1,0 +1,31 @@
+select * from qc_los.qt_disbursal_payment p where p.prospectid='1000076727' and p.disbursaldtlid='1000149750';
+
+select * from qc_los.qt_disbursal_dtl dt where dt.disbursaldtlid='1000149750';
+
+update qc_los.qt_disbursal_payment p set p.instrumentno='067891' where p.prospectid='1000076727' and p.disbursaldtlid='1000149750';
+
+
+select * from qc_los.qt_disbursal_payment p where p.disbursaldtlid in (
+select d.disbursaldtlid from qc_los.qt_disbursal_dtl d where d.disbursalid in  (
+select di.disbursalid from qc_los.qt_disbursal di where di.prospectid in(
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode='HJAL25000081052')));
+
+select * from qc_los.qt_disbursal_dtl d where d.disbursalid in  (
+select di.disbursalid from qc_los.qt_disbursal di where di.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode='HJAL25000081052'));
+
+
+select d.disbursaldtlid,d.disbursalid, di.prospectid,d.partyname
+from qc_los.qt_disbursal_dtl d left join qc_los.qt_disbursal di on di.disbursalid = d.disbursalid 
+where di.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode='HJAL25000081052');
+
+delete from   QC_LOS.QT_DISBURSAL_PAYMENT D
+WHERE D.PROSPECTID=1000081053 AND D.DISBURSALDTLID IN (1000150106)
+AND D.ISSUE_IN_FAVOR !='PANKAJ RAMESH RATHOD BANDHAN BANK AC NO 50180009877758';
+
+delete from   QC_LOS.QT_DISBURSAL_PAYMENT D 
+WHERE D.PROSPECTID=1000081053 AND D.DISBURSALDTLID IN (1000150107)
+AND D.ISSUE_IN_FAVOR !='BHAGVAN BHIKA CHAVHAN MAHARASHTRA GRAMIN BANK AC NO 80012452346
+
+--83345

@@ -1,0 +1,54 @@
+BEGIN
+  INSERT INTO qc_master.qm_scheme_x_depositbank
+    (ID,
+     SCHEME,
+     STAGE,
+     EVENT,
+     INSTRUMENT_TYPE,
+     DEPOSIT_BANKID,
+     NACH_DEFAULT_BANK,
+     ACTIVE,
+     MAKER_ID,
+     MAKER_DATE,
+     MAKER_SYSDATE,
+     MAKER_REMARKS,
+     AUTH_ID,
+     AUTH_DATE,
+     AUTH_SYSDATE,
+     AUTH_REMARK,
+     CREATED_DATETIME,
+     UPDATE_DATETIME)
+    SELECT (SELECT MAX(id) FROM qc_master.qm_scheme_x_depositbank) + ROWNUM AS ID,
+           c.SCHEME,
+           c.STAGE,
+           'RESCHEDULE' AS event,
+           c.INSTRUMENT_TYPE,
+           c.DEPOSIT_BANKID,
+           c.NACH_DEFAULT_BANK,
+           c.ACTIVE,
+           c.MAKER_ID,
+           c.MAKER_DATE,
+           c.MAKER_SYSDATE,
+           c.MAKER_REMARKS,
+           c.AUTH_ID,
+           c.AUTH_DATE,
+           c.AUTH_SYSDATE,
+           c.AUTH_REMARK,
+           c.CREATED_DATETIME,
+           c.UPDATE_DATETIME
+      FROM qc_master.qm_scheme_x_depositbank c
+     WHERE UPPER(c.event) = 'DISBURSAL' --reference event name
+       AND c.active = 'A'
+       AND c.scheme = 1000000052 --reference scheme id
+       AND NOT EXISTS
+     (SELECT 1
+              FROM qc_master.qm_scheme_x_depositbank r
+             WHERE UPPER(r.event) = 'RESCHEDULE'
+               AND r.scheme = c.scheme
+               AND r.stage = c.stage
+               AND r.INSTRUMENT_TYPE = c.INSTRUMENT_TYPE
+               AND r.DEPOSIT_BANKID = c.DEPOSIT_BANKID);
+
+  DBMS_OUTPUT.PUT_LINE('Missing RESCHEDULE mappings inserted from given event & scheme.');
+END;
+/

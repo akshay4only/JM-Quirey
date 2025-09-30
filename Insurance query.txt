@@ -1,0 +1,24 @@
+
+select * from qc_los.qt_prospect_x_insurance pxi where pxi.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='HJPR24000066131');
+
+update  qc_los.qt_prospect_x_insurance pxi set pxi.status='A'  where pxi.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='HJPR24000066131')
+and pxi.insuranceid='1000087655';
+
+select * from qc_los.qt_property p where p.prospect_id in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='LKUR25000090675');
+
+update qc_los.qt_prospect_x_insurance pxi set pxi.status='A'  where pxi.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='HJPR24000066131')
+and pxi.insuranceid='1000089646';
+
+1000087655 I
+
+1000089646 A
+
+
+select * from qc_los.qt_prospect_x_insurance pxi where pxi.prospectid in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='LGNT25000085180')
+and pxi.insurance_category='ASSET' and pxi.appl_asst_id not in (select p.property_id from qc_los.qt_property p where p.prospect_id in (
+select ld.prospectid from qc_los.qt_loandetail ld where ld.prospectcode ='LGNT25000085180'));

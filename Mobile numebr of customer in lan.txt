@@ -1,0 +1,5 @@
+select am.applicantcode,am.fname,ad.mobile,ld.prospectcode from qc_los.qt_applicantaddress ad left join 
+qc_los.qt_loan_x_customer lxc on ad.applicantid=lxc.applicantid 
+left join qc_los.qt_loandetail ld on ld.prospectid=lxc.prospectid
+left join qc_los.qt_applicantmaster am on am.applicantid=lxc.applicantid
+where ld.prospectcode ='LBAR25000085942';

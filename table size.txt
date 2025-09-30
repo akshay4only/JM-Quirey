@@ -1,0 +1,4 @@
+select s.tablespace_name,s.segment_name,round(sum(s.bytes)/(1024*1024*1024)) as GB from 
+dba_segments s where s.segment_type='TABLE' and s.segment_name in (select table_name from dba_tables)
+group by s.tablespace_name,s.segment_name
+order by 3 desc;

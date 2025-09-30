@@ -1,0 +1,33 @@
+   --LCBE23000041645
+   
+select * from qc_lms.qt_manualadvice md where md.prospectid='1000041646' and md.manualadviceid ='1000049993';
+
+update qc_lms.qt_manualadvice md set md.auth_status='X' where md.prospectid='1000041646' and md.manualadviceid ='1000049993';
+
+select * from qc_lms.qt_loancharge l where l.prospect_id='1000041646' and l.charge_id='1000100120';
+
+update qc_lms.qt_loancharge l
+   set l.service_tax = 0,
+       l.e_service_tax = 0,
+       l.total_charge = 0,
+       l.charge_amount = 0,
+       l.charge_bal_amount = 0,
+       l.charge_status = '-2',
+       l.status = 'X',
+       l.bal_service_tax = 0,
+       l.bal_e_service_tax = 0,
+       l.bal_net_charge_amt = 0,
+       l.net_charge_amt = 0
+ where charge_id = 1000100120
+   and charge_status = 0
+   and charge_bal_amount > 0
+   and total_charge > 0
+   and loancharge_id in (1002287370)
+   and prospect_id in (1000041646);
+   
+select * from qc_lms.qt_loancharge l where charge_id = 1000100120
+   and charge_status = 0
+   and charge_bal_amount > 0
+   and total_charge > 0
+   and loancharge_id in (1000100120)
+   and prospect_id in (1000041646);

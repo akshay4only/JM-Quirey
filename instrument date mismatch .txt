@@ -1,0 +1,5 @@
+select * from qc_los.qt_disbursal_payment p where p.prospectid='1000088135' and p.disbursaldtlid='1000172429';
+--18-06-25
+
+update  qc_los.qt_disbursal_payment p set p.auth_date='17-06-25'
+where p.prospectid='1000088135' and p.disbursaldtlid='1000172429';

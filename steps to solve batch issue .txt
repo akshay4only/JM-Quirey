@@ -1,0 +1,4 @@
+-- otc imd 
+-- accounting log entries 
+-- dr cr 
+-- instrument hand over pending 

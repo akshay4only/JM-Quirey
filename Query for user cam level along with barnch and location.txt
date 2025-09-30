@@ -1,0 +1,44 @@
+
+
+WITH UserBranches AS (
+    SELECT
+        ul.userid,
+        LISTAGG(g.description, ', ') WITHIN GROUP (ORDER BY g.description) AS user_branches
+    FROM
+        qc_user_auth.qm_userlocation ul
+    LEFT JOIN
+        qc_master.qm_geo g ON g.geoid = ul.geoid
+    GROUP BY
+        ul.userid
+), UserRoles AS (
+    SELECT
+        r.user_id,
+        LISTAGG(ur.userrole_name, ', ') WITHIN GROUP (ORDER BY ur.userrole_name) AS user_role
+    FROM
+        qc_user_auth.qm_user_x_role r
+    LEFT JOIN
+        qc_user_auth.qm_userrole ur ON ur.userroleid = r.role_id
+    GROUP BY
+        r.user_id
+)
+SELECT
+    lxc.userid,
+    u.loginname,
+    lxc.right,
+    lxc."LEVEL",
+    lxc.amount_from,
+    lxc.amount_to,
+    ub.user_branches,
+    ur.user_role
+FROM
+    qc_master.qm_user_x_camlevel lxc
+LEFT JOIN
+    qc_user_auth.qm_user u ON u.userid = lxc.userid
+LEFT JOIN
+    UserBranches ub ON u.userid = ub.userid
+LEFT JOIN
+    UserRoles ur ON u.userid = ur.user_id
+WHERE
+    u.is_active = 'A'
+ORDER BY
+    u.loginname;
