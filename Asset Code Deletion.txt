@@ -1,0 +1,29 @@
+delete from qc_los.qt_property pt
+ where pt.prospect_id in
+       (select ld.prospectid
+          from qc_los.qt_loandetail ld
+         where ld.prospectcode = 'LAMD19000004567')
+   and pt.property_code = 'AST0002186'
+
+delete from qc_los.qt_property pt
+ where pt.prospect_id in
+       (select ld.prospectid
+          from qc_los.qt_loandetail ld
+         where ld.prospectcode = 'LNIK24000056272')
+   and pt.property_code = 'AST0035470';
+   
+commit;
+   
+   
+create table qc_los.qt_property_FKEQ as    
+select *  from qc_los.qt_property pt
+ where pt.prospect_id in
+       (select ld.prospectid
+          from qc_los.qt_loandetail ld
+         where ld.prospectcode = 'LNIK24000056272')
+   and pt.property_code = 'AST0035470';
+
+commit;
+
+
+LJOD24000054267

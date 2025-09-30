@@ -1,0 +1,22 @@
+ 
+update qc_los.qt_employmentdetails ad
+   set ad.income_to_be_consider = 'Y'
+where ad.applicantid in (select w.applicantid
+  from qc_los.qt_applicantmaster w
+where w.applicantcode = 'CN0000000101131')
+
+update qc_los.qt_incomedetail id
+   set TOTAL_INCOME     = '34170293',
+       NET_INCOME       = '34170293',
+       PROFIT_AFTER_TAX = '34170293',
+       NET_PROFIT       = '34170293',
+       EBDITA           = '',
+       ELIGIBLEINCOME   = '2847524'
+ where id.applicantid in
+       (select w.applicantid
+          from qc_los.qt_applicantmaster w
+         where w.applicantcode = 'CN0000000101131')
+   and id.prospectid in
+       (select ld.prospectid
+          from qc_los.qt_loandetail ld
+         where ld.prospectcode = 'LMUM23000048293')

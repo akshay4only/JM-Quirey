@@ -1,0 +1,10 @@
+select * from qc_los.qt_applicantaddress ad where ad.applicantid in (
+select am.applicantid from qc_los.qt_applicantmaster am where am.applicantcode='CN0000000116290')
+
+select replace(ad.company_name,'''','') from qc_los.qt_applicantaddress ad where ad.applicantid in (
+select am.applicantid from qc_los.qt_applicantmaster am where am.applicantcode='CN0000000116290')
+and ad.addresstype='1000000002'
+
+update qc_los.qt_applicantaddress ad set ad.company_name = replace(ad.company_name,'''','') where ad.applicantid in (
+select am.applicantid from qc_los.qt_applicantmaster am where am.applicantcode='CN0000000116290')
+and ad.addresstype='1000000002'

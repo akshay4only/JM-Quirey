@@ -1,0 +1,14 @@
+Pan Card Update
+
+Unique pan card 
+
+select *
+  from qc_los.qt_applicantmaster am
+ where upper(am.panno) = upper('CZPPN5675J')
+
+update pan card 
+
+update qc_los.qt_applicantmaster am
+   set am.panno = upper('CZPPN5675J')
+ where am.applicantcode = 'CN0000000101715';
+commit;

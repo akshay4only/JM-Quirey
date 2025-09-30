@@ -1,0 +1,6 @@
+
+select * from qc_los.qt_notepad nd where nd.prospectid='1000066055' ;
+
+update qc_los.qt_notepad nd set nd.remarks = replace(nd.remarks,'''','') where nd.prospectid='1000066055' ;
+
+delete qc_los.qt_notepad nd where nd.prospectid='1000066055' and nd.notepadid=1000158133

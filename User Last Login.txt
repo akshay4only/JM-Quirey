@@ -1,0 +1,48 @@
+
+
+
+select
+ a.usercode as "Employee Code",
+  a.loginname as "Login ID",
+ a.userfname || ' ' || a.usermname || ' ' || a.userlname as "Employee Name",
+d.departmentname as "Department",
+  LISTAGG(c.discription, ', ') WITHIN GROUP(ORDER BY a.userid) as "Employee Role",
+ a.is_active as "Active / Disable",
+ decode(a.maker_date,a.maker_date,trunc(a.created_datetime)) as "Created Date",
+ decode(a.is_active,'I', trunc(a.auth_date)) as "Deactivated",
+trunc(login.Last_Login) last_login
+from qc_user_auth.qm_user a
+  left outer join (select au.userid,
+                                    max(au.created_datetime) Last_Login
+                               from qc_user_auth.qm_userlogininfoaudit au where au.login_status = 'Y'
+                              group by au.userid) login
+              on a.userid = login.userid
+  left outer join qc_user_auth.qm_user_x_role b
+    on a.userid = b.user_id
+  left outer join qc_user_auth.qm_userrole c
+    on b.role_id = c.userroleid
+  left outer join qc_master.qm_departmenttype d
+    on d.departmenttypeid = a.departmentid
+  --left outer join qc_master.qm_designation e
+    --on e.designationid = a.designation
+  left outer join qc_user_auth.qm_user ur
+    on a.supervisorid = ur.userid
+    
+ GROUP BY a.userid,
+          a.usercode,
+          a.userfname,
+          a.usermname,
+          a.userlname,
+          a.loginname,
+          d.departmentname,
+          --e.designationname,
+          b.user_id,
+          a.is_active,  
+          ur.userfname,
+          ur.usermname,
+          ur.userlname,
+          a.created_datetime,
+          a.maker_date,
+          a.auth_date,
+          login.Last_Login
+          ;

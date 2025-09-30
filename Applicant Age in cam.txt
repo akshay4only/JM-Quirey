@@ -1,0 +1,10 @@
+
+select applicantcode,applicant_age,((sysdate-dob)/365) from qc_los.qt_applicantmaster am where am.applicantcode 
+in ('CN0000000057324','CN0000000057325')
+
+select * from qc_los.qt_applicantmaster am where am.applicantcode 
+in ('CN0000000057324','CN0000000057325')
+
+
+update qc_los.qt_applicantmaster am set am.applicant_age=41 where am.applicantcode 
+in ('CN0000000057324','CN0000000057325')

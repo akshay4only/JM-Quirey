@@ -1,0 +1,18 @@
+
+select * from qc_lms.qt_batchdtl b where b.batch_id='1000018332';
+
+select * from qc_master.qt_batch_upload a where a.upload_id='1000003272';
+
+select * from qc_master.qt_batch_upload_issues w where w.upload_id='1000002422';
+
+select * from qc_los.qt_loandetail ld where ld.prospectcode ='HNIK24000064458';
+
+select * from qc_los.qt_disbursal_dtl dt where dt.disbursalid ='1000055008'
+
+select * from qc_accounting.qt_accounting_dtl dtl where dtl.prospect_id ='1000062947'
+
+select * from qc_master.qt_disbursal dd where dd.prospectid ='1000062947';
+
+select * from qc_los.qt_disbursal where prospectid='1000062947' and disbursalid='1000055008'
+
+update qc_los.qt_disbursal set auth_status='M'  where prospectid='1000062947' and disbursalid='1000055008'

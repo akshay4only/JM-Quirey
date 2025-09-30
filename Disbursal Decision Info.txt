@@ -1,0 +1,5 @@
+select * from qc_los.qt_loandetail ld where ld.prospectcode='LUMB23000046662'
+
+select * from qc_los.qt_disbursal_payment pay where pay.prospectid='1000046663' for update
+
+select * from qc_los.qt_disbursal_dtl dtl where dtl.disbursaldtlid='1000076406'for update

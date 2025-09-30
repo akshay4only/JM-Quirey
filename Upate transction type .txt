@@ -1,0 +1,6 @@
+select * from qc_los.qt_property pt where pt.property_code like '%AST0028837%'
+
+update qc_los.qt_property pt set pt.transaction_type='1000000006'
+ where 
+    pt.property_code = 'AST0028837';
+commit;

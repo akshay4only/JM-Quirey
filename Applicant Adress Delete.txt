@@ -1,0 +1,22 @@
+Address delete 
+
+select * from qc_master.qm_addresstype adt where adt.active='A'
+res    1000000001
+per    1000000002
+off    1000000003
+
+select *
+  from qc_los.qt_applicantaddress ad
+ where ad.applicantid in
+       (select am.applicantid
+          from qc_los.qt_applicantmaster am
+         where am.applicantcode = 'CN0000000102978')
+   and ad.addresstype = '1000000001';
+   
+delete from qc_los.qt_applicantaddress ad
+ where ad.applicantid in
+       (select am.applicantid
+          from qc_los.qt_applicantmaster am
+         where am.applicantcode = 'CN0000000102978')
+   and ad.addresstype = '1000000001'
+   and ad.addressid = '';

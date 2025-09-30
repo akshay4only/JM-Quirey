@@ -1,0 +1,3 @@
+update qc_los.qt_applicantmaster am
+   set am.DOB = to_date('07/01/1980', 'mm/dd/yyyy')
+ where am.APPLICANTCODE = 'CN0000000108809'

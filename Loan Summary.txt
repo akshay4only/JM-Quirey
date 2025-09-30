@@ -1,0 +1,257 @@
+SELECT * FROM QC_MASTER.QM_ACTION WHERE ACTIONID='1100106575'
+
+SELECT * FROM QC_MASTER.QM_WORKLIST WHERE NACTIONID='1100106575'
+
+
+SELECT * FROM (SELECT MIS_DATA.APP_FORM_NO "APPLICATION_FORM_NO",
+                             MIS_DATA.LOGIN_DATE "LOGIN_DATE",
+                             MIS_DATA.LOGIN_DATE "LOGIN_FROM",
+                             MIS_DATA.LOGIN_DATE "LOGIN_TO",
+                             MIS_DATA.LOGIN_MONTH "LOGIN_MONTH",
+                             MIS_DATA.LOAN_ID "LOAN_ID",
+                             MIS_DATA.CUSTOMER_ID "CUSTOMER_ID",
+                             MIS_DATA.BRANCH BRANCH,
+                             MIS_DATA.SCHEME SCHEME,
+                             MIS_DATA.CUSTOMER_NAME "CUSTOMER_NAME",
+                             MIS_DATA.TOTAL_INCOME TOTAL_INCOME,
+                             MIS_DATA.CUSTOMER_CONTACT_NO "CUSTOMER_CONTACT_NO",
+                             MIS_DATA.PD_LOCATION "PD_LOCATION",
+                             MIS_DATA.APPLIED_AMOUNT "APPLIED_AMOUNT",
+                             MIS_DATA.CIBIL_SCORE "CIBIL_SCORE",
+                             MIS_DATA.OCCUPATION OCCUPATION,
+                             MIS_DATA.CASE_TYPE "CASE_TYPE",
+                             MIS_DATA.PRODUCT_TYPE "PRODUCT_TYPE",
+                             MIS_DATA.ROI,
+                             MIS_DATA.TENURE,
+                             MIS_DATA.LOAN_STATUS,
+                             MIS_DATA.SANCTION_AMOUNT "SANCTION_AMOUNT",
+                             MIS_DATA.SANCTION_DATE "SANCTION_DATE",
+                             MIS_DATA.SANCTION_DATE "SANC_FROM_DATE",
+                             MIS_DATA.SANCTION_DATE "SANC_TO_DATE",
+                             MIS_DATA.SANCTION_MONTH "SANCTION_MONTH",
+                             MIS_DATA.DISBURSE_IN_HFC "DISBURSAL_AMOUNT",
+                             MIS_DATA.DISBURSALDATE "DISBURSAL_DATE",
+                             MIS_DATA.DISBURSALDATE "DISB_FROM_DATE",
+                             MIS_DATA.DISBURSALDATE "DISB_TO_DATE",
+                             MIS_DATA.DISBURSAL_MONTH "DISBURSAL_MONTH", MIS_DATA.IS_AUTOREJECT "IS_AUTOREJECT",
+                             MIS_DATA.REJECTED_AMOUNT "REJECTED_AMOUNT",
+                             MIS_DATA.REJECTED_DATE "REJECTED_DATE",
+                             MIS_DATA.REJECTED_MONTH "REJECTED_MONTH",
+                             MIS_DATA.POS "POS",
+                             MIS_DATA.LTV "LTV_PER",
+                             MIS_DATA.PROPERTY_TYPE "PROPERTY_TYPE",
+                             MIS_DATA.ASSET_VALUE "ASSET_VALUE",
+                             MIS_DATA.PROPERTY_ADDRESS "PROPERTY_ADDRESS",
+                             MIS_DATA.LOCALITY "LOCALITY",
+                             MIS_DATA.OWNERSHIP,
+                             MIS_DATA.CHANNEL_NAMES "CHANNEL_TYPE",
+                             MIS_DATA.CHANNEL_NAME "CHANNEL_NAME",
+                             MIS_DATA.AGENT_NAME "AGENT_NAME",
+                             MIS_DATA.CO_APP_GARANTOR_NAME "CO_APPLICANT_NAME",
+                             MIS_DATA.GARANTOR_NAME "GARANTOR_NAME",
+                             MIS_DATA.CUSTOMER_TYPE "CUSTOMER_TYPE",
+                             NVL(MIS_DATA.LOGIN_FEES, 0) "LOGIN_FEES",
+                             MIS_DATA.FC_CHECK_LOGIN_CHECK_STATUS "LOGIN_CHEQUE_STATUS",
+                             MIS_DATA.EMI_START_DATE "EMI_START_DATE",
+                             MIS_DATA.INSTL_AMT "INSTALLMENT_AMOUNT",
+                             MIS_DATA.TOTAL_IMD_AMT,
+                             MIS_DATA.TOTAL_DISB_DEDUCTION,
+                             MIS_DATA.NET_DISB_AMT "NET_DISB_AMOUNT",
+                             MIS_DATA.LEGAL_SEND_DATE,
+                             MIS_DATA.LEGAL_RECEIVED_DATE,
+                             MIS_DATA.LEGAL_STATUS,
+                             -- MIS_DATA.REMARKS_GEN_LEG_TECH "LEGAL_REMARKS",
+                             MIS_DATA.TECHNICAL_SEND_DATE,
+                             MIS_DATA.TECHNICAL_RECEIVED_DATE,
+                             MIS_DATA.TECHNICAL_STATUS,
+                             MIS_DATA.TECHNICAL_REMARK,
+                             MIS_DATA.A_ITR_BANK_S "A_BANK_ITR_VER_SEND_DATE",
+                             MIS_DATA.A_ITR_BANK_R "A_BANK_ITR_VER_RECIEVE_DATE",
+                             MIS_DATA.A_ITR_BANK_V_S "A_BANK_ITR_VERIFICATION_STATUS",
+                             MIS_DATA.A_ITR_BANK_V_R "A_BANK_ITR_VERIFICATION_REMARK",
+                             MIS_DATA.A_FCU_S "A_FCU_CHECK_SEND_DATE",
+                             MIS_DATA.A_FCU_R "A_FCU_CHECK_RECIEVE_DATE",
+                             MIS_DATA.A_FCU_V_S "A_FCU_CHECK_STATUS",
+                             MIS_DATA.A_FCU_V_R "A_FCU_CHECK_REMARK",
+                             MIS_DATA.C_ITR_BANK_S "C_BANK_ITR_VER_SEND_DATE",
+                             MIS_DATA.C_ITR_BANK_R "C_BANK_ITR_VER_RECIEVE_DATE",
+                             MIS_DATA.C_ITR_BANK_V_S "C_BANK_ITR_VERIFICATION_STATUS",
+                             MIS_DATA.C_ITR_BANK_V_R "C_BANK_ITR_VERIFICATION_REMARK",
+                             MIS_DATA.C_FCU_S "C_FCU_CHECK_SEND_DATE",
+                             MIS_DATA.C_FCU_R "C_FCU_CHECK_RECIEVE_DATE",
+                             MIS_DATA.C_FCU_V_S "C_FCU_CHECK_STATUS",
+                             MIS_DATA.C_FCU_V_R "C_FCU_CHECK_REMARK",
+                             MIS_DATA.A_CPV_RES_SEND_DATE,
+                             MIS_DATA.A_CPV_RES_RECIEVE_DATE,
+                             MIS_DATA.A_CPV_RES_STATUS "A_CPV_RESIDENCE_STATUS",
+                             MIS_DATA.A_CPV_RES_REMARK "A_CPV_RESIDENCE_REMARK",
+                             MIS_DATA.A_CPV_OFFICE_SEND_DATE,
+                             MIS_DATA.A_CPV_OFFICE_RECIEVE_DATE,
+                             MIS_DATA.A_CPV_OFFICE_STATUS,
+                             MIS_DATA.A_CPV_OFFICE_REMARK,
+                             MIS_DATA.C_CPV_RES_SEND_DATE,
+                             MIS_DATA.C_CPV_RES_RECIEVE_DATE,
+                             MIS_DATA.C_CPV_RES_STATUS "C_CPV_RESIDENCE_STATUS1",
+                             MIS_DATA.C_CPV_RES_REMARK "C_CPV_RESIDENCE_STATUS2",
+                             MIS_DATA.C_CPV_OFFICE_SEND_DATE,
+                             MIS_DATA.C_CPV_OFFICE_RECIEVE_DATE,
+                             MIS_DATA.C_CPV_OFFICE_STATUS,
+                             MIS_DATA.C_CPV_OFFICE_REMARK,
+                             MIS_DATA.CR_OFF1 "RECOMMENDED_BY_OFF1",
+                             MIS_DATA.CR_OFF2 "RECOMMENDED_BY_OFF2",
+                             MIS_DATA.CR_OFF3 "SANCTIONED_BY",
+                             MIS_DATA.REJECT_CODE,
+                             REPLACE(REPLACE(MIS_DATA.REMARKS,CHR(13), ' '), CHR(10), ' ') REMARKS,
+                             MIS_DATA.EXPECTED_DISB_DATE, /*,
+                             MIS_DATA.REJECTED_BEFORE*/
+                             MIS_DATA.INCOMEPROOF PMAY_ELIGIBLE,
+                             MIS_DATA.FEMALE_OWNERSHIP   FEMALE_OWNERSHIP,
+                             MIS_DATA.SECURITIZATION_FLAG,
+                             MIS_DATA.TRANCHE,
+                  MIS_DATA.FC_DATE,
+                  MIS_DATA.SM_CODE,
+                  MIS_DATA.AGENT_CODE,
+                  MIS_DATA.DBR,
+                  MIS_DATA.EMPLOYMENT_TYPE,
+                  MIS_DATA.CONSTITUTION,
+                  MIS_DATA.INDUSTRY,
+                  MIS_DATA.TYPE_OF_BUSINESS,
+                  MIS_DATA.FC_AMOUNT,
+                  MIS_DATA.FC_POS,
+                  MIS_DATA.PMAY_SUBSIDY_STATUS,
+                   MIS_DATA.CUSTOMER_CONTACT_EMAIL "CUSTOMER_CONTACT_EMAIL"
+                      FROM	(WITH Q1 AS (SELECT LD.PROSPECTCODE AS LOAN_ID,
+                                                 ROWNUM AS RANKING,
+                                                 APP.APPLICANTCODE AS CUSTOMER_ID,
+                                                 (SELECT G.GEONAME
+                                                    FROM QC_MASTER.QM_GEO G
+                                                   WHERE G.GEOID = LD.BRANCH) AS BRANCH,
+                                                 (SELECT MAX(VF.VERIFICATIONID)
+                                                    FROM QC_LOS.QT_VERIFICATION VF
+                                                   WHERE VF.PROSPECTID = LD.PROSPECTID) VERIFICATION_ID,
+                                                 (SELECT PRODNAME
+                                                    FROM QC_MASTER.QM_PRODUCT P
+                                                   WHERE P.PRODUCTID = LD.SCHEME) SCHEME,
+                                                 LD.FORMNUMBER AS APP_FORM_NO,
+                                                 LD.APPLICATIONDATE AS LOGIN_DATE,
+                                                 TO_CHAR(LD.APPLICATIONDATE,
+                                                         'MON-YYYY') AS LOGIN_MONTH,
+                                                 APP.FNAME || ' ' || APP.MNAME || ' ' ||
+                                                 APP.LNAME AS CUSTOMER_NAME,
+                                                  (SELECT NVL(SUM(TOTAL_INCOME), 0)
+                                                    FROM QC_LOS.QT_INCOMEDETAIL N
+                                                   WHERE N.APPLICANTID in
+                                                         (select lxc.applicantid
+                                                            from qc_los.qt_loan_x_customer lxc
+                                                           where lxc.prospectid =
+                                                                 ld.prospectid) /*LD.CUSTOMERID*/
+                                                  ) TOTAL_INCOME,
+                                                 APD.MOBILE AS CUSTOMER_CONTACT_NO,
+                                                 APD.EMAIL AS CUSTOMER_CONTACT_EMAIL,
+                                                 (SELECT CBL_SC.SCORE
+                                                    FROM QC_LOS.QT_CIBIL_SCORE_SEG CBL_SC
+                                                   WHERE CBL_SC.RESPONSE_ID =
+                                                         (SELECT MAX(CBL_RES.RESPONSE_ID)
+                                                            FROM QC_LOS.QT_CIBIL_RESPONSE_ID CBL_RES
+                                                           WHERE CBL_RES.PROSPECT_ID =
+                                                                 LD.PROSPECTID)) AS CIBIL_SCORE,
+                                                 (SELECT IM.INCOMEMETHODNAME
+                                                    FROM QC_MASTER.QM_INCOMEMETHOD IM
+                                                   WHERE EXISTS((SELECT IDE.INCOMEMETHOD
+                                                                  FROM QC_LOS.QT_INCOMEDETAILELIGIBILITY IDE
+                                                                 WHERE IDE.PROSPECTID =
+                                                                       LD.PROSPECTID
+                                                                   AND IDE.INCOMEMETHOD =
+                                                                       IM.INCOMEMETHODID))) AS OCCUPATION,
+                                                 (SELECT PRODNAME
+                                                    FROM QC_MASTER.QM_PRODUCT P
+                                                   WHERE P.PRODUCTID = LD.PRODUCT) AS CASE_TYPE,
+                                                 (SELECT L.LOANTYPENAME
+                                                    FROM QC_MASTER.QM_LOANTYPE L
+                                                   WHERE L.LOANTYPEID = LD.LOANTYPE) AS PRODUCT_TYPE,
+                                                 LD.LOANAMOUNT AS APPLIED_AMOUNT,
+                                                 LD.SANCTIONED_AMOUNT DECISION_AMOUNT,
+                                                 LD.SANCTIONED_AMOUNT AS SANCTION_AMOUNT,
+                                                 LD.SANCTIONED_AMOUNT SANCTION_HFC,
+                                           (select sum(td.tranche_amount) from qc_los.qt_tranche_dtl td where td.prospectid=ld.prospectid and td.tranche_disbursed='Y' and td.active='A') AS DISBURSE_IN_HFC,
+                                                 (SELECT SUM(DISBURSED_AMT)
+                                                    FROM QC_LOS.QT_DISBURSAL
+                                                   WHERE PROSPECTID = LD.PROSPECTID) AS DISBURSE_IS_NBFC,
+                                                 LD.INTRATE AS ROI,
+                                                                              /* ROUND( (SELECT   (LD.SANCTIONED_AMOUNT +
+                                         NVL(LD.EXISTING_POS, 0)) /
+                                         (select SUM(a.total_marketvalue)
+                                              from qc_los.QT_PROPERTY a
+                                             where a.prospect_id = LD.PROSPECTID) * 100 FROM DUAL),2) LTV,*/ --commented by amit
+                                           CASE WHEN (select NVL(SUM(a.total_marketvalue),0)
+                                              from qc_los.QT_PROPERTY a
+                                             where a.prospect_id = LD.PROSPECTID
+                                             ) <> 0 THEN ROUND((SELECT (LD.SANCTIONED_AMOUNT +
+                                         NVL(LD.EXISTING_POS, 0)) /
+                                         (select SUM(a.total_marketvalue)
+                                              from qc_los.QT_PROPERTY a
+                                             where a.prospect_id = LD.PROSPECTID
+                                             ) * 100 FROM DUAL),2) ELSE 0 END AS LTV,
+                                         /* (SELECT INC_ELG.INCOMEDTL_LTVPERCENT
+                                                                                       FROM QC_LOS.QT_INCOMEDETAILELIGIBILITY INC_ELG
+                                                                                      WHERE INC_ELG.PROSPECTID =
+                                                                                            LD.PROSPECTID) AS LTV,*/ ---commented by shubham on 06/NOV/2020
+                                                 LD.TENOR AS TENURE,
+                                                 (SELECT PP.AREA
+                                                    FROM QC_LOS.QT_PROPERTY PP
+                                                   WHERE PP.PROSPECT_ID =
+                                                         LD.PROSPECTID
+                                                     AND ROWNUM = 1) AS LOCALITY,
+                                                 REPLACE((SELECT PP.FLATHOUSENO || ',' ||
+                                                         PP.BUILDINGNAME || ',' ||
+                                                         PP.STREET || ',' || PP.AREA || ',' ||
+                                                         (SELECT SS.DISPLAYNAME
+                                                            FROM QC_MASTER.QM_STATEMASTER SS
+                                                           WHERE SS.STATEMASTERID =
+                                                                 PP.STATE) || ',' ||
+                                                         (SELECT CTY.DISPLAYNAME
+                                                            FROM QC_MASTER.QM_CITYMASTER CTY
+                                                           WHERE CTY.CITYMASTERID =
+                                                                 PP.CITY) || ',' ||
+                                                         PP.POSTALCODE
+                                                    FROM QC_LOS.QT_PROPERTY PP
+                                                   WHERE PP.PROSPECT_ID =
+                                                         LD.PROSPECTID
+                                                     AND ROWNUM = 1),'"') AS PROPERTY_ADDRESS, /*REPLACE DOUBLE QUOTES FROM PROPERTY ADDRESS FILD BY AMIT BISWAL:08-07-2021*/
+                                                 (SELECT PPT.PROPERTYTYPENAME
+                                                    FROM QC_MASTER.QM_PROPERTYTYPE PPT
+                                                   WHERE PPT.PROPERTYTYPEID =
+                                                         (SELECT PP.PROPERTY_TYPE
+                                                            FROM QC_LOS.QT_PROPERTY PP
+                                                           WHERE PP.PROSPECT_ID =
+                                                                 LD.PROSPECTID
+                                                             AND ROWNUM = 1)) AS PROPERTY_TYPE,(SELECT PP.TOTAL_COST
+                                                    FROM QC_LOS.QT_PROPERTY PP
+                                                   WHERE PP.PROSPECT_ID =
+                                                         LD.PROSPECTID
+                                                     AND ROWNUM = 1) AS PROPERTY_VALUE,
+                                                 (SELECT S.SALESMANAGERNAME
+                                                    FROM QC_MASTER.QM_SALESMANAGER S
+                                                   WHERE S.SALESMANAGERID =
+                                                         LD.SALESMANAGERID) AS OWNERSHIP,
+                                                 (CASE
+                                                   WHEN (SELECT APD.ADDRESSTYPE
+                                                           FROM QC_LOS.QT_APPLICANTADDRESS APD
+                                                          WHERE APD.APPLICANTID =
+                                                                APP.APPLICANTID
+                                                            AND APD.APPLICANTTYPE =
+                                                                1000000001
+                                                            AND APD.ADDRESSTYPE =
+                                                                1000000002
+                                                            AND ROWNUM = 1) =
+                                                        1000000002 THEN
+                                                    APD.FLATNO || ' ' ||
+                                                    APD.BUILDINGNAME || ' ' ||
+                                                    APD.FLOORNO || ' ' ||
+                                                    (SELECT CM.CITYMASTERNAME
+                                                       FROM QC_MASTER.QM_CITYMASTER CM
+                                                      WHERE CM.CITYMASTERID =
+                                                            (SELECT APD.CITY
+                                                               FROM QC_LOS.QT_APPLICANTADDRESS APD
+                                                              WHERE APD.APPLICANTID =
+                                                                    APP.APPLICANTID
