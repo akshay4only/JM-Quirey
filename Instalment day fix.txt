@@ -1,0 +1,14 @@
+
+UPDATE qc_los.qt_loandetail ld
+SET ld.instalment_day = (
+    SELECT cd.instalment_day
+    FROM QM_SCHEME_X_INSTL_DAY_CONFIG cd
+    WHERE cd.product_id = ld.scheme
+    AND cd.id = ld.instalment_day
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM QM_SCHEME_X_INSTL_DAY_CONFIG cd
+    WHERE cd.product_id = ld.scheme
+    AND cd.id = ld.instalment_day
+);

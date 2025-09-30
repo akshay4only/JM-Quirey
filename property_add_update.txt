@@ -1,0 +1,15 @@
+
+select * from qc_master.qt_property_techval_hl t where t.property_id='47749';
+
+update qc_master.qt_property_techval_hl t set t.flathouseno='Sub-Plot No. 41/B/1 Pranami Park-4' where t.property_id='47749';
+
+select * from qc_master.qt_property_legalval_hl t where t.property_id='47749';
+
+update qc_master.qt_property_legalval_hl t set t.street='Pranami Park-4' where t.property_id='47749';
+
+select * from qc_los.qt_property p where p.prospect_id='1000076973';
+
+update qc_los.qt_property p set p.buildingname='R.S. No. 916 paiki 1 and 916 paiki 2 Pranami Park-4' where p.prospect_id='1000076973';
+
+update qc_los.qt_property set RESIDENTIAL_DWELLINGUNIT ='0',LOCATION_TYPE ='1000000075',BLOCK_TALUKA ='0'
+where property_code ='AST0012095';

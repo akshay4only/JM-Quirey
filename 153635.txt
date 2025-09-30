@@ -1,0 +1,112 @@
+DECLARE   
+    CONST_FAILURE      CHAR(1) := 'F';
+    CONST_SUCCESS      CHAR(1) := 'S';
+    CONST_YES          CHAR(1) := 'Y';
+    CONST_NO           CHAR(1) := 'N';
+    CONST_AUTHOR       CHAR(1) := 'A';
+    CONST_ACTIVE       CHAR(1) := 'A';
+    CONST_COMPLETE     CHAR(1) := 'C';
+    CONST_NA_ACTIVITY  NUMBER := -1;
+    CONST_MONTHLY      CHAR(1) := 'M';
+    CONST_SYS_USERID  NUMBER := 1000000025;
+    LVT_EVENT_CHARGE  QC_LMS.PKG_LMS_CHARGE_INFO.EVENT_CHARGE_TABLE;
+    LVC_STATUS       VARCHAR2(3);
+    LVC_MESSAGE      VARCHAR2(100);
+    LVN_BRANCH_ID     NUMBER;
+    LVC_NPA_STAGE     QC_LOS.QT_LOANDETAIL.NPA_STAGE%TYPE;
+    LVN_SCHEME        NUMBER;
+	  LVD_VALUE_DATE    DATE  := QC_LOS.GETPARAMVALUE('LOS', 'BUSINESS DATE');
+	  LVD_TRANS_DATE    DATE  := QC_LOS.GETPARAMVALUE('LOS', 'BUSINESS DATE');
+	  LVC_SOURCE_ID     VARCHAR2(50) := 1000176696; 
+    P_PROSPECTID      NUMBER  := 1000062951 ;	
+    LVD_MATURITY_DATE DATE;
+    LVN_INDEX         NUMBER := 1;    
+    P_STATUS          VARCHAR2(100);
+    P_MESSAGE         VARCHAR2(1000);
+    
+  BEGIN    
+  
+  UPDATE QC_LMS.QT_LOANCHARGE LC
+   SET LC.CHARGE_BAL_AMOUNT  = LC.TOTAL_CHARGE,
+       LC.BAL_NET_CHARGE_AMT = LC.TOTAL_CHARGE,
+       LC.BAL_SERVICE_TAX    = LC.E_SERVICE_TAX,
+       LC.BAL_E_SERVICE_TAX  = LC.E_SERVICE_TAX,
+       LC.CHARGE_STATUS      = '0'
+ WHERE LC.LOANCHARGE_ID IN (1002817736,1002732174);
+     
+UPDATE QC_LMS.QT_LOANCHARGE LC
+     SET LC.CHARGE_BAL_AMOUNT  = LC.CHARGE_BAL_AMOUNT +1117,
+         LC.CHARGE_STATUS      = '0',
+         LC.STATUS             = 'A',
+         LC.BAL_NET_CHARGE_AMT = LC.BAL_NET_CHARGE_AMT + 1117
+   WHERE PROSPECT_ID = P_PROSPECTID
+     AND LOANCHARGE_ID IN (1002816094);	 
+
+     UPDATE QC_LMS.QT_LOANCHARGE LC
+     SET LC.CHARGE_BAL_AMOUNT  = LC.CHARGE_BAL_AMOUNT +117,
+         LC.CHARGE_STATUS      = '0',
+         LC.STATUS             = 'A',
+         LC.BAL_NET_CHARGE_AMT = LC.BAL_NET_CHARGE_AMT + 117
+   WHERE PROSPECT_ID = P_PROSPECTID
+     AND LOANCHARGE_ID IN (1002032333);
+     
+
+UPDATE QC_LMS.QT_LOAN_CHARGE_TRANS_DTL LCD
+   SET LCD.ALLOCATED_AMOUNT = 0,
+       LCD.AMT_EXCL_TAX     = 0,
+       LCD.AUTH_STATUS      = 'X',
+       LCD.INSTR_STATUS     = 'X'
+ WHERE LCD.TRANS_PROC_ID=LVC_SOURCE_ID
+   AND LCD.TRANS_TYPE='KNOCK OFF';
+   
+UPDATE QC_LMS.QT_CHARGE_ADJUSTMENT CA
+   SET CA.INSTRUMENT_STATUS = 'X',
+       CA.AUTH_STATUS = 'X'
+ WHERE CA.PROSPECT_ID = P_PROSPECTID
+   AND CA.ID = LVC_SOURCE_ID
+   AND CA.TRANS_TYPE = 'KNOCK OFF';
+	 
+     dbms_output.put_line('--- Prospect: '||P_PROSPECTID||'  --------');     
+  
+        LVT_EVENT_CHARGE(LVN_INDEX).CHARGE_ID := 1000000105;
+        LVT_EVENT_CHARGE(LVN_INDEX).CHARGE_AMOUNT := -1117 ;
+        LVN_INDEX := LVN_INDEX + 1;		
+		
+        LVT_EVENT_CHARGE(LVN_INDEX).CHARGE_ID := 1000000104;
+        LVT_EVENT_CHARGE(LVN_INDEX).CHARGE_AMOUNT := -1117 ;
+        LVN_INDEX := LVN_INDEX + 1;		
+        	
+		
+    IF LVT_EVENT_CHARGE.COUNT > 0 THEN
+      SELECT BRANCH, NPA_STAGE, SCHEME, LD.MATURITY_DATE
+        INTO LVN_BRANCH_ID, LVC_NPA_STAGE, LVN_SCHEME, LVD_MATURITY_DATE
+        FROM QC_LOS.QT_LOANDETAIL LD
+       WHERE PROSPECTID = P_PROSPECTID;
+
+      QC_ACCOUNTING.PKG_LLM_ACCOUNTING.PR_ACCOUNTING_ENTRY(R_EVENT_CHARGE   => LVT_EVENT_CHARGE,
+                                                           P_PROSPECT_ID    => P_PROSPECTID,
+                                                           P_BRANCH_ID      => LVN_BRANCH_ID,
+                                                           P_GL_ID          => NULL,
+                                                           P_NPA_STAGE      => LVC_NPA_STAGE,
+                                                           P_SCHEME_ID      => LVN_SCHEME,
+                                                           P_EVENT_NAME     => '''KNOCK OFF''',
+                                                           P_VALUE_DATE     => LVD_VALUE_DATE,
+                                                           P_TRANS_DATE     => LVD_TRANS_DATE,
+                                                           EXEC_STATUS      => LVC_STATUS,
+                                                           P_MESSAGE        => LVC_MESSAGE,
+                                                           P_TRAN_EVEN_NAME => 'KNOCK OFF',
+                                                           P_SOURCE_ID      => LVC_SOURCE_ID,
+                                                           P_TRAN_TYPE      => NULL,
+                                                           P_BANK_ID        => NULL,
+                                                           P_BANK_BRANCH_ID => NULL,
+                                                           P_BANK_ACC_NO    => NULL,
+                                                           P_USERID         => CONST_SYS_USERID);    
+
+    P_STATUS := CONST_SUCCESS;
+    dbms_output.put_line('Prospect: '||P_PROSPECTID||', Status: '||P_STATUS);     
+  END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+      P_STATUS := CONST_FAILURE;
+      dbms_output.put_line('Prospect: '||P_PROSPECTID||', Status: '||P_STATUS||','||sqlcode||','||sqlerrm);     
+END;    

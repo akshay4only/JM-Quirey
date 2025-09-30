@@ -1,0 +1,83 @@
+set serveroutput on;
+Declare
+  l_id             number;
+  l_IDVALUE        number;
+  l_CODEVALUE      varchar2(100);
+  l_STATUS         varchar2(1);
+  l_ERROR_CODE     varchar2(100);
+  l_ERROR_DESC     varchar2(1000);
+  v_count          NUMBER ;
+  v_agencymasterid number := :AGENCY;
+  v_branchid       number ;
+  v_activity_type  VARCHAR2(100) := 'SOURCING';
+  v_agency_type    number := 1000000007;
+  l_maker_id       number := 1000000825;
+  l_author_id      number := 1000000578;
+  l_maker_remarks  varchar2(100) := 'ok';
+  l_author_remarks varchar2(100) := 'ok';
+begin
+
+
+for i in (select p.productid from qc_master.qm_product p where p.productid in (2000000050,2000000057)) loop
+dbms_output.put_line(i.productid);
+
+for j in (select * from qc_master.qm_geo g where g.geotypeid='1000000006' and g.active='A') loop
+
+v_branchid := j.geoid;
+
+select count(*) into v_count from qc_master.qm_agency_x_activity_type axa 
+where axa.product=i.productid and axa.branch= v_branchid and axa.agencymasterid=v_agencymasterid;
+
+if v_count = 0 then
+    Pr_Generate(P_SEQUENCENAME => 'QM_AGENCY_X_ACTIVITY_TYPE',
+                          P_IDVALUE      => l_IDVALUE,
+                          P_CODEVALUE    => l_CODEVALUE,
+                          P_STATUS       => l_STATUS,
+                          P_ERROR_CODE   => l_ERROR_CODE,
+                          P_ERROR_DESC   => l_ERROR_DESC);
+
+INSERT INTO qc_master.qm_agency_x_activity_type (
+    id,
+    agencymasterid,
+    activity_type,
+    activity_id,
+    active,
+    maker_id,
+    maker_remarks,
+    maker_date,
+    auth_id,
+    auth_remark,
+    auth_date,
+    branch,
+    product,
+    created_datetime,
+    update_datetime
+) VALUES (
+    l_IDVALUE,
+    v_agencymasterid,
+    v_activity_type,
+    v_agency_type,
+    'A',
+    l_maker_id,
+    'ok',
+    sysdate,
+    l_author_id,
+    'OK',
+    sysdate,
+    v_branchid,
+    i.productid,
+    sysdate,
+    sysdate
+);
+commit;
+
+
+end if;
+
+end loop;
+end loop;
+
+end;
+
+
+

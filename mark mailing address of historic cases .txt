@@ -1,0 +1,58 @@
+CREATE OR REPLACE PROCEDURE update_mailing_address()
+AS
+BEGIN
+  FOR rec IN (SELECT applicantid
+              FROM   qt_applicantaddress
+              WHERE  applicantid NOT IN (SELECT applicantid
+                                        FROM   qt_applicantaddress
+                                        WHERE  mailingaddress = 'Y')
+              GROUP  BY applicantid) LOOP
+    -- Try to update AddressType '1000000001' first
+    UPDATE qt_applicantaddress
+    SET    mailingaddress = 'Y'
+    WHERE  addressid = (SELECT addressid
+                        FROM   qt_applicantaddress
+                        WHERE  applicantid = rec.applicantid
+                        AND    addresstype = '1000000001'
+                        FETCH FIRST ROW ONLY)
+    AND    applicantid = rec.applicantid;
+    -- If no update was made (i.e., no address with AddressType '1000000001'),
+    -- update AddressType '1000000003'
+    IF SQL%NOTFOUND THEN
+      UPDATE qt_applicantaddress
+      SET    mailingaddress = 'Y'
+      WHERE  addressid = (SELECT addressid
+                          FROM   qt_applicantaddress
+                          WHERE  applicantid = rec.applicantid
+                          AND    addresstype = '1000000003'
+                          FETCH FIRST ROW ONLY)
+      AND    applicantid = rec.applicantid;
+    END IF;
+  END LOOP;
+  COMMIT;
+END;
+/
+
+-- To execute the procedure
+EXECUTE update_mailing_address();
+
+
+
+SELECT applicantid
+FROM   qt_applicantaddress
+WHERE  mailingaddress = 'Y'
+GROUP  BY applicantid
+HAVING Count(*) > 1;
+
+
+
+-----------------------------------------------------------------------------------
+select ad.applicantid from qc_los.qt_applicantaddress ad 
+group by ad.applicantid
+having count (case WHEN ad.mailingaddress ='Y' Then 1 ELSE NULL END) =0;
+
+select * from qc_los.qt_applicantaddress a where a.applicantid in (
+select ad.applicantid from qc_los.qt_applicantaddress ad 
+group by ad.applicantid
+having count (case WHEN ad.mailingaddress ='Y' Then 1 ELSE NULL END) =0)
+and a.addresstype=1000000001;

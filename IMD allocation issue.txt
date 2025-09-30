@@ -1,0 +1,25 @@
+
+select * from qc_los.qt_loandetail ld where ld.prospectcode ='HSWD25000100829';
+
+
+select * from qc_lms.qt_loancharge l where l.prospect_id='1000100830' ;
+
+update qc_lms.qt_loancharge l
+   set 
+       l.charge_bal_amount = 10965,
+       l.charge_status = '0',
+       l.status = 'A'
+ where charge_id = 1000000120
+
+   and loancharge_id in (1002848794)
+   and prospect_id in (1000100830);
+   
+   update qc_lms.qt_loancharge l
+   set 
+       l.charge_bal_amount = 10965,
+       l.charge_status = '-2',
+       l.status = 'X'
+ where charge_id = 1000000120
+
+   and loancharge_id in (1002848794)
+   and prospect_id in (1000100830);

@@ -1,0 +1,33 @@
+set SERVEROUTPUT on;
+DECLARE
+    total_updated_rows NUMBER := 0; -- Initialize a counter for total updated rows
+BEGIN
+    -- Start DML statements
+
+delete from qc_lms.qt_foreclosure
+where PROSPECT_ID in (1000051516,
+1000068170)
+
+ 
+    total_updated_rows := total_updated_rows + SQL%ROWCOUNT; -- Add rows 
+
+
+
+    -- End DML statements
+
+    -- Check if the total affected row count matches the expected count
+    IF total_updated_rows = 33 -- 2 rows to be updated in total
+    THEN
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Total rows updated: ' || total_updated_rows);
+        DBMS_OUTPUT.PUT_LINE('COMMIT done');
+        DBMS_OUTPUT.PUT_LINE(SYSTIMESTAMP);
+
+    ELSE
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Unexpected total row count: ' || total_updated_rows);
+        DBMS_OUTPUT.PUT_LINE('ROLLBACK done');
+        DBMS_OUTPUT.PUT_LINE(SYSTIMESTAMP);
+
+    END IF;
+END;

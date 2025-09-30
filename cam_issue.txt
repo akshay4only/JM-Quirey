@@ -1,0 +1,133 @@
+SELECT to_char(LD.LOANAMOUNT,'999,99,99,990.99') LOANAMOUNT,
+       to_char(LD.INTRATE,'990.99') || '%' INTRATE,
+       to_char(LD.TENOR,'990') tenor,
+       /*(SELECT to_char(IE.INCOMEDTL_EMI,'999,99,99,990.99')
+          FROM QC_LOS.QT_INCOMEDETAILELIGIBILITY IE
+         WHERE IE.PROSPECTID = LD.PROSPECTID) EMI,*/
+		 /*to_char( nvl((SELECT PMT1.EMI_AMT
+                                FROM qc_los.QT_PMNTSCH PMT1
+                               WHERE PMT1.PROSPECTID = LD.PROSPECTID
+                                 AND PMT1.DUE_DATE =
+                                     COALESCE((SELECT MIN(PMT2.DUE_DATE)
+                                                FROM qc_los.QT_PMNTSCH PMT2
+                                               WHERE PMT2.PROSPECTID = PMT1.PROSPECTID
+                                                 AND PMT2.DUE_DATE >= QC_LOS.GETPARAMVALUE('LOS', 'BUSINESS DATE')
+                                                 AND PMT2.INSTALMENT_NO <> 1 
+                                              ),
+                                              (SELECT MAX(PMT3.DUE_DATE)
+                                                 FROM qc_los.QT_PMNTSCH PMT3
+                                                WHERE PMT3.PROSPECTID = PMT1.PROSPECTID))),0)
+               ,'999,99,99,990.99') EMI,*/
+			   CASE 
+   WHEN LD.LOANSUBSTATUSID = 1000000004 THEN
+        (SELECT NVL(PMT1.EMI_AMT,0)
+           FROM QC_LOS.QT_PMNTSCH PMT1
+          WHERE PMT1.PROSPECTID = LD.PROSPECTID
+            AND PMT1.DUE_DATE = COALESCE(
+                   (SELECT MIN(PMT2.DUE_DATE)
+                      FROM QC_LOS.QT_PMNTSCH PMT2
+                     WHERE PMT2.PROSPECTID = PMT1.PROSPECTID
+                       AND PMT2.PRINCIPAL > 0),
+                   (SELECT MAX(PMT3.DUE_DATE)
+                      FROM QC_LOS.QT_PMNTSCH PMT3
+                     WHERE PMT3.PROSPECTID = PMT1.PROSPECTID)
+                )
+        )
+   ELSE 
+        COALESCE(
+           (CASE 
+               WHEN NVL(LD.EMI,0) = 0 THEN NULL
+               ELSE TO_NUMBER(LD.EMI)
+            END),
+           ROUND(
+              QC_LOS.PKG_LOS_TRN_LOAN_DETAIL.FN_CALCULATEEMI(
+                 LD.SANCTIONED_AMOUNT,
+                 NVL(
+                    (SELECT AGR.OLD_TENOR
+                       FROM QC_LOS.QT_RESCHEDULEAGR AGR
+                      WHERE AGR.RESCHEDULEAGR_ID = (
+                                SELECT MIN(AGR.RESCHEDULEAGR_ID)
+                                  FROM QC_LOS.QT_RESCHEDULEAGR AGR
+                                 WHERE AGR.AGREEMENT_ID = LD.PROSPECTID
+                            )
+                        AND ROWNUM = 1
+                    ), 
+                    LD.TENOR
+                 ),
+                 NVL(
+                    (SELECT R.INTEREST_RATE
+                       FROM QC_LMS.QT_INTEREST_CALC_RESCH R
+                      WHERE R.PROSPECTID = LD.PROSPECTID
+                        AND ROWNUM = 1
+                    ), 
+                    LD.INTRATE
+                 )
+              )
+           )
+        )
+END || '/-' EMI,
+       (SELECT LT.LOANTYPENAME
+          FROM QC_MASTER.QM_LOANTYPE LT
+         WHERE LT.LOANTYPEID = LD.LOANTYPE) LOANTYPE,
+       (SELECT to_char(SUM(PTY.TOTAL_MARKETVALUE),'999,99,99,990.99')
+          FROM QC_LOS.QT_PROPERTY PTY
+         WHERE PTY.PROSPECT_ID = LD.PROSPECTID) TOTAL_VALUATION_AMOUNT,
+       (select to_char(elg.incomedtl_propertyvalue,'999,99,99,990.99') from qc_los.qt_incomedetaileligibility elg where elg.prospectid = ld.prospectid) propertyvalue,
+(select to_char(elg.incomedtl_dbrpercent,'999,99,99,990.99') from qc_los.qt_incomedetaileligibility elg where elg.prospectid = ld.prospectid)incomedtl_dbrpercent,
+--(select to_char(elg.incomedtl_ltvpercent,'999,99,99,990.99') from qc_los.qt_incomedetaileligibility elg where elg.prospectid = ld.prospectid)incomedtl_ltvpercent,
+NVL(TO_CHAR(round(((QC_LOS.PKG_LOS_TRN_EDUCATION_LOAN.fn_getpos(LD.prospectcode,'Existing POS')+ld.sanctioned_amount)/
+         QC_LOS.PKG_LOS_TRN_EDUCATION_LOAN.fn_getpos(LD.prospectcode,'Asset Value(MV)'))*100,2)),(select to_char(elg.incomedtl_ltvpercent,'999,99,99,990.99') from qc_los.qt_incomedetaileligibility elg where elg.prospectid = ld.prospectid)) incomedtl_ltvpercent,
+to_char(ld.sanctioned_amount,'999,99,99,990.99') sanctioned_amount,
+       (select to_char(sum(pxi.tot_premium_amt),'999,99,99,990.99')
+       from qc_los.qt_prospect_x_insurance pxi
+       where pxi.prospectid = ld.prospectid
+       and pxi.status ='A') insurance_premium,
+       to_char(LD.SANCTIONED_AMOUNT - (select sum(pxi.tot_premium_amt)
+       from qc_los.qt_prospect_x_insurance pxi
+       where pxi.prospectid = ld.prospectid
+       and pxi.status ='A'),'999,99,99,990.99') base_amount,
+       to_char(LD.OCR_REQUIREMENT,'999,99,99,990.99') OCR_REQUIREMENT,
+       LD.OCR_ARRANGEMENT,
+       (select sum(lch.net_charge_amt) || ' + GST'
+         from qc_master.qm_scheme_x_charge sxc, qc_lms.qt_loancharge lch
+        where sxc.productid = ld.scheme
+         and sxc.chargeid = 1000000111
+         and sxc.active = 'A'
+         and sxc.chargeid = lch.charge_id
+         and lch.prospect_id = ld.prospectid) app_fees,
+       (select sum(lch.net_charge_amt) || ' + GST'
+         from qc_master.qm_scheme_x_charge sxc, qc_lms.qt_loancharge lch
+        where sxc.productid = ld.scheme
+         and sxc.chargeid = 1000002100
+         and sxc.active = 'A'
+         and sxc.chargeid = lch.charge_id
+         and lch.prospect_id = ld.prospectid) login_fees
+  FROM QC_LOS.QT_LOANDETAIL LD
+ WHERE LD.PROSPECTID = $P{P_PROSPECTID}
+   AND LD.LOANSUBSTATUSID IN (1000000001,1000000002,1000000003,1000000011)
+
+UNION
+
+SELECT
+  CLD.LOANAMOUNT,
+  CLD.INTRATE,
+  CLD.TENOR,
+  CLD.EMI,
+  CLD.LOANTYPE,
+  CLD.TOTAL_VALUATION_AMOUNT,
+  CLD.PROPERTYVALUE,
+  CLD.INCOMDTL_DBRPERCENT,
+  NVL(TO_CHAR(round(((QC_LOS.PKG_LOS_TRN_EDUCATION_LOAN.fn_getpos(LD.prospectcode,'Existing POS')+ld.sanctioned_amount)/
+         QC_LOS.PKG_LOS_TRN_EDUCATION_LOAN.fn_getpos(LD.prospectcode,'Asset Value(MV)'))*100,2)),CLD.INCOMDTL_LTVPERCENT) INCOMDTL_LTVPERCENT,
+  --CLD.INCOMDTL_LTVPERCENT,
+  CLD.SANCTIONED_AMOUNT,
+  CLD.INSURANCE_PREMIUM,
+  CLD.BASE_AMOUNT,
+  CLD.OCR_REQUIREMENT,
+  CLD.OCR_ARRANGEMENT,
+  CLD.APP_FEES,
+  CLD.LOGIN_FEES
+ FROM QC_LOS.QT_CAM_LOAN_DETAILS CLD, QC_LOS.QT_LOANDETAIL LD
+WHERE LD.PROSPECTID = CLD.PROSPECTID
+  AND LD.PROSPECTID = $P{P_PROSPECTID}
+  AND LD.LOANSUBSTATUSID NOT IN (1000000001,1000000002,1000000003,1000000011)
