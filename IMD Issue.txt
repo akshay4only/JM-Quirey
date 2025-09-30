@@ -1,0 +1,13 @@
+
+
+select * from qc_lms.qt_loancharge l where l.prospect_id='1000096652' and l.activity_name='IMD';
+
+update qc_lms.qt_loancharge l
+   set 
+       l.charge_bal_amount = 43579,
+       l.charge_status = '0',
+       l.status = 'A'
+ where charge_id = 1000000111
+
+   and loancharge_id in (1002673419)
+   and prospect_id in (1000096652);

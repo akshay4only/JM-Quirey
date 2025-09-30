@@ -1,0 +1,85 @@
+SET SERVEROUTPUT ON;
+
+DECLARE
+    vn_id        NUMBER;
+    vc_code      VARCHAR2(100);
+    vc_status    VARCHAR2(100);
+    vc_errcode   VARCHAR2(100);
+    vc_errdesc   VARCHAR2(1000);
+
+    vn_maker_id  NUMBER := 1000000701;
+    vn_author_id NUMBER := 1000000578;
+    vd_date      DATE;
+    vn_userid    NUMBER := 1000001306;
+    vn_exists_count NUMBER; -- Declare a variable to hold the count
+
+BEGIN
+    FOR i IN (SELECT g.geoid
+              FROM qc_master.qm_geo g
+              WHERE g.state = '1000000090'
+              AND g.active = 'A')
+    LOOP
+        -- Execute the EXISTS check as a SELECT statement into a variable
+        SELECT COUNT(*)
+        INTO vn_exists_count
+        FROM qc_user_auth.qm_userlocation l
+        WHERE l.userid = vn_userid
+        AND l.geoid = i.geoid;
+
+        -- Now use the variable in the IF condition
+        IF vn_exists_count = 0 THEN -- If count is 0, it means the geoid does NOT exist for the user
+
+            qc_master.pr_generate(P_SEQUENCENAME => 'QM_USERLOCATION',
+                                  P_IDVALUE      => vn_id,
+                                  P_CODEVALUE    => vc_code,
+                                  P_STATUS       => vc_status,
+                                  P_ERROR_CODE   => vc_errcode,
+                                  P_ERROR_DESC   => vc_errdesc);
+
+            DBMS_OUTPUT.put_line('this' || vn_id);
+            
+            
+INSERT INTO qc_user_auth.qm_userlocation (
+    userlocationid,
+    userid,
+    geoid,
+    effectivestartdate,
+    effectiveenddate,
+    createdby,
+    created_datetime,
+    updateby,
+    update_datetime,
+    status,
+    maker_id,
+    maker_date,
+    maker_sysdate,
+    maker_remarks,
+    auth_id,
+    auth_date,
+    auth_sysdate,
+    auth_remark
+) VALUES (
+    vn_id,
+    vn_userid,
+    i.geoid,
+    NULL,
+    NULL,
+    NULL,
+    trunc(sysdate),
+    NULL,
+    NULL,
+    'A',
+    vn_maker_id,
+    trunc(sysdate),
+    NULL,
+    'ok',
+    vn_author_id,
+    trunc(sysdate),
+    NULL,
+    'ok'
+);
+commit;
+
+        END IF;
+    END LOOP;
+END;

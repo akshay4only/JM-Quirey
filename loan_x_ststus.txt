@@ -1,0 +1,16 @@
+SELECT rownum, t.*
+FROM (
+    SELECT
+        ld.prospectid,
+        ld.prospectcode,
+        (select g.description from qc_master.qm_geo g where g.geoid=ld.branch) Branch,
+        (SELECT sm.salesmanagercode FROM qc_master.qm_salesmanager sm WHERE sm.salesmanagerid = ld.salesmanagerid) AS salesmanager_code,
+        (SELECT sm.salesmanagername FROM qc_master.qm_salesmanager sm WHERE sm.salesmanagerid = ld.salesmanagerid) AS salesmanager,
+        (SELECT atp.agencytypemastername FROM qc_master.qm_agencytypemaster atp WHERE atp.agencytypemasterid = ld.originationtype) AS Agency,
+        (SELECT agm.agentmastername FROM qc_master.qm_agentmaster agm WHERE agm.agentmasterid = ld.originationagent) AS Agent,
+        (SELECT atp.agencytypemastername FROM qc_master.qm_agencytypemaster atp WHERE atp.agencytypemasterid = ld.fulfillmenttype) AS Agency_sec,
+        (SELECT agm.agentmastername FROM qc_master.qm_agentmaster agm WHERE agm.agentmasterid = ld.fulfillmentagent) AS Agent_sec,
+        (select ls.loanstatusname from  qc_master.qm_loan_status ls where ls.loanstatusid= ld.loansubstatusid) Status
+    FROM qc_los.qt_loandetail ld
+    ORDER BY 1 DESC
+) t;

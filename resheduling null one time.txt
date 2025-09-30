@@ -1,0 +1,30 @@
+UPDATE QC_LOS.QT_LOANDETAIL L
+   SET L.MATURITY_DATE = (SELECT MAX(P.DUE_DATE)
+                            FROM QC_LOS.QT_PMNTSCH P
+                           WHERE P.PROSPECTID = L.PROSPECTID)
+ WHERE L.LOANSUBSTATUSID IN (1000000004, 1000000010)
+   AND L.MATURITY_DATE IS NULL
+   AND EXISTS
+ (SELECT 1 FROM QC_LOS.QT_PMNTSCH P WHERE P.PROSPECTID = L.PROSPECTID);
+
+UPDATE QC_LMS.QT_RESCHEDULEAGR R
+   SET R.RESCHEDULE_EFF_DATE = (SELECT DP.CLR_DATE
+                                  FROM QC_LOS.QT_DISB_PAYMENT_CLEARANCE DP
+                                 WHERE DP.PROSPECT_ID = R.AGREEMENT_ID
+                                   AND DP.CLR_ID = R.TRANCHE_DISBURSALID
+                                   AND DP.AUTH_STATUS = 'A')
+ WHERE R.RESCHEDULE_EFF_DATE IS NULL;
+
+UPDATE QC_LMS.QT_INT_RATES_SLAB_RESCH T
+   SET T.RESCHEDULE_EFFECTIVE_DATE = (SELECT R.RESCHEDULE_EFF_DATE
+                                        FROM QC_LMS.QT_RESCHEDULEAGR R
+                                       WHERE R.AGREEMENT_ID = T.PROSPECTID
+                                         AND T.COL_RESCHEDULEAGR_ID =
+                                             R.RESCHEDULEAGR_ID),
+       T.FROM_DATE                 = (SELECT R.RESCHEDULE_EFF_DATE
+                                        FROM QC_LMS.QT_RESCHEDULEAGR R
+                                       WHERE R.AGREEMENT_ID = T.PROSPECTID
+                                         AND T.COL_RESCHEDULEAGR_ID =
+                                             R.RESCHEDULEAGR_ID)
+ WHERE T.RESCHEDULE_EFFECTIVE_DATE IS NULL
+   AND T.FROM_DATE IS NULL;

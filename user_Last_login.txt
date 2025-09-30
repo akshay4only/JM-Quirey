@@ -1,0 +1,32 @@
+
+set SERVEROUTPUT on;
+begin
+
+for i in (WITH UserLatestLogin AS (
+    SELECT
+        a.userid,
+        a.logindatetime,
+        ROW_NUMBER() OVER (PARTITION BY a.userid ORDER BY a.logindatetime DESC) as rn
+    FROM
+        QC_USER_AUTH.QM_USERLOGININFOAUDIT a
+)
+SELECT
+    u.userid,
+    u.loginname,
+    u.is_active,
+    ull.logindatetime
+FROM
+    qc_user_auth.qm_user u
+LEFT JOIN
+    UserLatestLogin ull ON u.userid = ull.userid
+WHERE
+    ull.rn = 1 and u.is_active='A' and
+    ull.logindatetime < trunc(sysdate-90)) loop
+
+update qc_user_auth.qm_user u set u.is_active='I',u.maker_remarks ='Incative for 90 days' where u.userid =i.userid;
+DBMS_OUTPUT.put_line(i.userid||' ' ||i.loginname);
+end loop;
+commit;
+end;
+
+    

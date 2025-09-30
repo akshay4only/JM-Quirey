@@ -1,0 +1,10 @@
+
+select ld.prospectid ,ld.prospectcode,
+(select g.description from qc_master.qm_geo g where g.geoid=ld.branch) branch,
+(select p.prodname from qc_master.qm_product p where p.productid=ld.product) product
+,ld.disbursaldate,
+(select loanstatusname from qc_master.qm_loan_status where loanstatusid=ld.loansubstatusid) status
+,(select r.riskcategoryname from qc_master.qm_riskcategory r where r.riskcategoryid=ld.risk_categoryid) 
+"Risk Category"
+from qc_los.qt_loandetail ld where ld.loansubstatusid 
+in(1000000004,1000000010,1000000011) order by 1 desc;

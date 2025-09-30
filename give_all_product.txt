@@ -1,0 +1,110 @@
+-- all product
+set SERVEROUTPUT on;
+
+declare 
+ vn_id      number;
+  vc_code    varchar2(100);
+  vc_status  varchar2(100);
+  vc_errcode varchar2(100);
+  vc_errdesc varchar2(1000);
+
+  vn_maker_id  number := 1000000701;
+  vn_author_id number := 1000000578;
+  vd_date      date;
+  vn_userid   number :=1000001306;
+begin
+
+for i in (select  p.productid from qc_master.qm_product p where p.active='A') loop
+
+    qc_master.pr_generate(P_SEQUENCENAME => 'QM_USER_X_PRODUCT',
+                                     P_IDVALUE      => vn_id,
+                                     P_CODEVALUE    => vc_code,
+                                     P_STATUS       => vc_status,
+                                     P_ERROR_CODE   => vc_errcode,
+                                     P_ERROR_DESC   => vc_errdesc);
+                                     
+DBMS_OUTPUT.put_line ('this' || vn_id ||' '||vn_userid || ' is ' || i.productid || 'inserted');
+insert into qc_master.qm_user_x_product(
+id,
+productid,
+userid,
+active,
+maker_id,
+maker_remarks,
+auth_id,
+auth_remark,
+created_datetime)
+values(
+vn_id,
+i.productid,
+vn_userid,
+'A',
+vn_maker_id,
+'ok',
+vn_author_id,
+'ok',
+SYSDATE
+);
+DBMS_OUTPUT.put_line (vn_id ||' '||vn_userid || ' is ' || i.productid || 'inserted');
+                                     
+
+end loop;
+                                     
+end;
+
+-- ahl product 
+
+set serveroutput on;
+declare 
+ vn_id      number;
+  vc_code    varchar2(100);
+  vc_status  varchar2(100);
+  vc_errcode varchar2(100);
+  vc_errdesc varchar2(1000);
+
+  vn_maker_id  number := 1000000701;
+  vn_author_id number := 1000000578;
+  vd_date      date;
+  vn_userid   number := 1000001353;
+begin
+
+for i in (select  p.productid from qc_master.qm_product p where p.active='A'
+ and (p.productid in (2000000050,2000000057)or
+p.parentprodid in (2000000050,2000000057) )
+)loop
+
+    pr_generate(P_SEQUENCENAME => 'QM_USER_X_PRODUCT',
+                                     P_IDVALUE      => vn_id,
+                                     P_CODEVALUE    => vc_code,
+                                     P_STATUS       => vc_status,
+                                     P_ERROR_CODE   => vc_errcode,
+                                     P_ERROR_DESC   => vc_errdesc);
+                                     
+DBMS_OUTPUT.put_line ('this' || vn_id ||' '||vn_userid || ' is ' || i.productid || 'inserted');
+insert into qc_master.qm_user_x_product(
+id,
+productid,
+userid,
+active,
+maker_id,
+maker_remarks,
+auth_id,
+auth_remark,
+created_datetime)
+values(
+vn_id,
+i.productid,
+vn_userid,
+'A',
+vn_maker_id,
+'ok',
+vn_author_id,
+'ok',
+SYSDATE
+);
+DBMS_OUTPUT.put_line (vn_id ||' '||vn_userid || ' is ' || i.productid || 'inserted');
+                                     
+
+end loop;
+                                     
+end;

@@ -1,0 +1,347 @@
+set colsep ,
+set headsep off
+set pagesize 1000
+set trimspool on
+set linesize 1000
+set numwidth 1000
+spool table_size.csv
+##query;##
+spool off
+
+############## Step - 1   #################
+*Schema Wise Usage*
+
+select owner, sum(bytes)/1024/1024 size_in_mb from dba_segments group by owner;
+
+############ Step-2 #######################
+################## Total Final DB size query ##############################
+
+select
+'===========================================================' || chr(10) ||
+'Total Database Physical Size = ' || round(redolog_size_gib+dbfiles_size_gib+tempfiles_size_gib+ctlfiles_size_gib,2) || ' GiB' || chr(10) ||
+'===========================================================' || chr(10) ||
+' Redo Logs Size : ' || round(redolog_size_gib,3) || ' GiB' || chr(10) ||
+' Data Files Size : ' || round(dbfiles_size_gib,3) || ' GiB' || chr(10) ||
+' Temp Files Size : ' || round(tempfiles_size_gib,3) || ' GiB' || chr(10) ||
+' Archive Log Size - Approx only : ' || round(archlog_size_gib,3) || ' GiB' || chr(10) ||
+' Control Files Size : ' || round(ctlfiles_size_gib,3) || ' GiB' || chr(10) ||
+'===========================================================' || chr(10) ||
+' Used Database Size : ' || used_db_size_gib || ' GiB' || chr(10) ||
+' Free Database Size : ' || free_db_size_gib || ' GiB' ||chr(10) ||
+' Data Pump Directory Size : ' || dpump_db_size_gib || ' GiB' || chr(10) ||
+' BDUMP Directory Size : ' || bdump_db_size_gib || ' GiB' || chr(10) ||
+' ADUMP Directory Size : ' || adump_db_size_gib || ' GiB' || chr(10) ||
+'===========================================================' || chr(10) ||
+'Total Size (including Dump and Log Files) = ' || round(round(redolog_size_gib,2) +round(dbfiles_size_gib,2)+round(tempfiles_size_gib,2)+round(ctlfiles_size_gib,2) +round(adump_db_size_gib,2) +round(dpump_db_size_gib,2)+round(bdump_db_size_gib,2),2) || ' GiB' || chr(10) ||
+'===========================================================' as summary
+FROM (SELECT sys_context('USERENV', 'DB_NAME')
+db_name,
+(SELECT SUM(bytes) / 1024 / 1024 / 1024 redo_size
+FROM v$log)
+redolog_size_gib,
+(SELECT SUM(bytes) / 1024 / 1024 / 1024 data_size
+FROM dba_data_files)
+dbfiles_size_gib,
+(SELECT nvl(SUM(bytes), 0) / 1024 / 1024 / 1024 temp_size
+FROM dba_temp_files)
+tempfiles_size_gib,
+(SELECT SUM(blocks * block_size / 1024 / 1024 / 1024) size_gib
+FROM v$archived_log
+WHERE first_time >= SYSDATE - (
+(SELECT value
+FROM rdsadmin.rds_configuration
+WHERE name =
+'archivelog retention hours') /
+24 ))
+archlog_size_gib,
+(SELECT SUM(block_size * file_size_blks) / 1024 / 1024 / 1024
+controlfile_size
+FROM v$controlfile)
+ctlfiles_size_gib,
+round(SUM(used.bytes) / 1024 / 1024 / 1024, 3)
+db_size_gib,
+round(SUM(used.bytes) / 1024 / 1024 / 1024, 3) - round(
+free.f / 1024 / 1024 / 1024)
+used_db_size_gib,
+round(free.f / 1024 / 1024 / 1024, 3)
+free_db_size_gib,
+(SELECT round(SUM(filesize) / 1024 / 1024 / 1024, 3)
+FROM TABLE(rdsadmin.rds_file_util.listdir('BDUMP')))
+bdump_db_size_gib,
+(SELECT round(SUM(filesize) / 1024 / 1024 / 1024, 3)
+FROM TABLE(rdsadmin.rds_file_util.listdir('ADUMP')))
+adump_db_size_gib,
+(SELECT round(SUM(filesize) / 1024 / 1024 / 1024, 3)
+FROM TABLE(rdsadmin.rds_file_util.listdir('DATA_PUMP_DIR')))
+dpump_db_size_gib
+FROM (SELECT bytes
+FROM v$datafile
+UNION ALL
+SELECT bytes
+FROM v$tempfile) used,
+(SELECT SUM(bytes) AS f
+FROM dba_free_space) free
+GROUP BY free.f);
+
+################### Step-3 ####################To find archive-log ###############
+
+SELECT sum(FILESIZE)/1024/1024/1024 archivelog_usage_GiB FROM TABLE(rdsadmin.rds_file_util.listdir(p_directory => 'ARCHIVELOG_DIR'));
+
+EXEC rdsadmin.rdsadmin_master_util.create_archivelog_dir;
+
+## For 24 Hour #####
+SELECT sum(blocks*block_size)/1024/1024/1024 FROM v$archived_log WHERE first_time >=sysdate-72/24 AND dest_id=1;
+
+############# ALL Tablespace Usage ###################
+
+select df.tablespace_name "Tablespace",
+totalusedspace "Used MB",
+(df.totalspace - tu.totalusedspace) "Free MB",
+df.totalspace "Total MB",
+round(100 * ( (df.totalspace - tu.totalusedspace)/ df.totalspace))
+"Pct. Free"
+from
+(select tablespace_name,
+round(sum(bytes) / 1048576) TotalSpace
+from dba_data_files 
+group by tablespace_name) df,
+(select round(sum(bytes)/(1024*1024)) totalusedspace, tablespace_name
+from dba_segments 
+group by tablespace_name) tu
+where df.tablespace_name = tu.tablespace_name ;
+
+*TEMP Tablespace  Usage*
+
+SELECT d.status "Status", d.tablespace_name "Name", d.contents "Type", d.extent_management
+"ExtManag",
+TO_CHAR(NVL(a.bytes / 1024 / 1024, 0),'99,999,990.900') "Size (M)", TO_CHAR(NVL(t.bytes,
+0)/1024/1024,'99999,999.999') ||'/'||TO_CHAR(NVL(a.bytes/1024/1024, 0),'99999,999.999') "Used (M)",
+TO_CHAR(NVL(t.bytes / a.bytes * 100, 0), '990.00') "Used %"
+FROM sys.dba_tablespaces d, (select tablespace_name, sum(bytes) bytes from dba_temp_files group by
+tablespace_name) a,
+(select tablespace_name, sum(bytes_cached) bytes from
+v$temp_extent_pool group by tablespace_name) t
+WHERE d.tablespace_name = a.tablespace_name(+) AND d.tablespace_name = t.tablespace_name(+)
+AND d.extent_management like 'LOCAL' AND d.contents like 'TEMPORARY';
+
+*Datafile Usage*
+
+SET PAUSE ON
+SET PAUSE 'Press Return to Continue'
+SET PAGESIZE 60
+SET LINESIZE 300
+COLUMN "Tablespace Name" FORMAT A20
+COLUMN "File Name" FORMAT A80
+ 
+SELECT  Substr(df.tablespace_name,1,20) "Tablespace Name",
+        Substr(df.file_name,1,80) "File Name",
+        Round(df.bytes/1024/1024,0) "Size (M)",
+        decode(e.used_bytes,NULL,0,Round(e.used_bytes/1024/1024,0)) "Used (M)",
+        decode(f.free_bytes,NULL,0,Round(f.free_bytes/1024/1024,0)) "Free (M)",
+        decode(e.used_bytes,NULL,0,Round((e.used_bytes/df.bytes)*100,0)) "% Used"
+FROM    DBA_DATA_FILES DF,
+       (SELECT file_id,
+               sum(bytes) used_bytes
+        FROM dba_extents
+        GROUP by file_id) E,
+       (SELECT sum(bytes) free_bytes,
+               file_id
+        FROM dba_free_space
+        GROUP BY file_id) f
+WHERE    e.file_id (+) = df.file_id
+AND      df.file_id  = f.file_id (+)
+ORDER BY df.tablespace_name,
+         df.file_name
+/
+
+
+*Tables with high storage Owner Wise*
+
+SELECT
+   owner, 
+   table_name, 
+   TRUNC(sum(bytes)/1024/1024) Meg,
+   ROUND( ratio_to_report( sum(bytes) ) over () * 100) Percent
+FROM
+(SELECT segment_name table_name, owner, bytes
+ FROM dba_segments
+ WHERE segment_type IN ('TABLE', 'TABLE PARTITION', 'TABLE SUBPARTITION')
+ UNION ALL
+ SELECT i.table_name, i.owner, s.bytes
+ FROM dba_indexes i, dba_segments s
+ WHERE s.segment_name = i.index_name
+ AND   s.owner = i.owner
+ AND   s.segment_type IN ('INDEX', 'INDEX PARTITION', 'INDEX SUBPARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.segment_name
+ AND   s.owner = l.owner
+ AND   s.segment_type IN ('LOBSEGMENT', 'LOB PARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.index_name
+ AND   s.owner = l.owner
+ AND   s.segment_type = 'LOBINDEX')
+WHERE owner in UPPER('&owner')
+GROUP BY table_name, owner
+HAVING SUM(bytes)/1024/1024 > 10  /* Ignore really small tables */
+ORDER BY SUM(bytes) desc
+;
+
+
+#####TABLES 100M or large all schema######
+
+SELECT
+   owner, 
+   table_name, 
+   TRUNC(sum(bytes)/1024/1024) Meg,
+   ROUND( ratio_to_report( sum(bytes) ) over () * 100) Percent
+FROM
+(SELECT segment_name table_name, owner, bytes
+ FROM dba_segments
+ WHERE segment_type IN ('TABLE', 'TABLE PARTITION', 'TABLE SUBPARTITION')
+ UNION ALL
+ SELECT i.table_name, i.owner, s.bytes
+ FROM dba_indexes i, dba_segments s
+ WHERE s.segment_name = i.index_name
+ AND   s.owner = i.owner
+ AND   s.segment_type IN ('INDEX', 'INDEX PARTITION', 'INDEX SUBPARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.segment_name
+ AND   s.owner = l.owner
+ AND   s.segment_type IN ('LOBSEGMENT', 'LOB PARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.index_name
+ AND   s.owner = l.owner
+ AND   s.segment_type = 'LOBINDEX')
+WHERE owner like '%QC_%'
+GROUP BY table_name, owner
+HAVING SUM(bytes)/1024/1024 > 100  /* Ignore really small tables */
+ORDER BY SUM(bytes) desc
+;
+
+#################To check Table-growth ################
+select   obj.owner, obj.object_name,
+         to_char(sn.BEGIN_INTERVAL_TIME,'RRRR-MON-DD') start_day,
+         sum(a.SPACE_USED_DELTA/1024/1024) block_increase_MB
+from     dba_hist_seg_stat a,
+         dba_hist_snapshot sn,
+         dba_objects obj
+where    sn.snap_id = a.snap_id
+and      a.instance_number = sn.instance_number
+and      obj.object_id = a.obj#
+and      obj.owner not in ('SYS','SYSTEM')
+and      end_interval_time between to_timestamp('01-JAN-2024','DD-MON-RRRR')
+         and to_timestamp('29-MAR-2024','DD-MON-RRRR')
+group by obj.owner, obj.object_name,
+         to_char(sn.BEGIN_INTERVAL_TIME,'RRRR-MON-DD')
+order by obj.owner, obj.object_name
+
+
+########### Table with above 1 GB size   ######################
+
+SELECT
+   owner, 
+   table_name, 
+   TRUNC(sum(bytes)/1024/1024/1024) GB,
+   ROUND( ratio_to_report( sum(bytes) ) over () * 100) Percent
+FROM
+(SELECT segment_name table_name, owner, bytes
+ FROM dba_segments
+ WHERE segment_type IN ('TABLE', 'TABLE PARTITION', 'TABLE SUBPARTITION')
+ UNION ALL
+ SELECT i.table_name, i.owner, s.bytes
+ FROM dba_indexes i, dba_segments s
+ WHERE s.segment_name = i.index_name
+ AND   s.owner = i.owner
+ AND   s.segment_type IN ('INDEX', 'INDEX PARTITION', 'INDEX SUBPARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.segment_name
+ AND   s.owner = l.owner
+ AND   s.segment_type IN ('LOBSEGMENT', 'LOB PARTITION')
+ UNION ALL
+ SELECT l.table_name, l.owner, s.bytes
+ FROM dba_lobs l, dba_segments s
+ WHERE s.segment_name = l.index_name
+ AND   s.owner = l.owner
+ AND   s.segment_type = 'LOBINDEX')
+WHERE owner like '%QC_%'
+GROUP BY table_name, owner
+HAVING SUM(bytes)/1024/1024/1024 > 1  /* Ignore really small tables */
+ORDER BY SUM(bytes) desc
+;
+
+##################### Database free space ############################################################
+select sum(bytes)/1024/1024 from dba_free_space;
+############ Check Parameter on DB ################
+show parameter open_cursors;  
+show parameter processes;
+####################################To check processes and sessions####################################################
+select current_utilization, limit_value ,resource_name
+From v$resource_limit
+Where resource_name IN ('sessions','processes');
+#################################To check processes and sessions counts####################################################
+SELECT name, to_number(value) FROM v$parameter WHERE name in ( 'processes', 'sessions') union all SELECT 'current sessions', COUNT(*) FROM v$session union all SELECT 'current processes', COUNT(*) FROM v$process;
+###########################################################################################################
+
+SELECT COUNT(*)  FROM v$session where username='QC_LOS';
+SELECT COUNT(*) from v$session where username='QC_INTEGRATION_BOX' and status='INACTIVE';
+
+SELECT COUNT(*) FROM v$session WHERE username LIKE 'QC\_%' ESCAPE '\' AND status = 'INACTIVE';
+
+netstat -nt | awk '$4 ~ /:(443)$/ && $6 ~ /ESTABLISHED/ {print $5}' | cut -d: -f1 | sort | uniq -c
+
+############### Connection Leakage #################
+
+select LAST_CALL_ET, SQL_TEXT, username, machine, to_char(logon_time, 'ddMon hh24:mi') as login, SQL_HASH_VALUE, PREV_HASH_VALUE, status from v$session, v$sql where username='QC_LOS' and HASH_VALUE =  PREV_HASH_VALUE
+order by last_call_et desc;
+##########################################
+select --LAST_CALL_ET,
+       SQL_TEXT,
+	   count(1),
+       max(username),
+       max(machine),
+       Min(to_char(logon_time, 'ddMon hh24:mi')) as First_login,
+       max(to_char(logon_time, 'ddMon hh24:mi')) as last_login
+  from v$session, v$sql
+ where username = 'QC_LOS'
+   and HASH_VALUE = PREV_HASH_VALUE
+   group by SQL_TEXT
+
+######################################################################
+############### Connection Leakage #################
+
+select LAST_CALL_ET, SQL_TEXT, username, machine, to_char(logon_time, 'ddMon hh24:mi') as login, SQL_HASH_VALUE, PREV_HASH_VALUE, status from v$session, v$sql where username='QC_LOS' and HASH_VALUE =  PREV_HASH_VALUE
+order by last_call_et desc;
+#####################################################################
+select --LAST_CALL_ET,
+       SQL_TEXT,
+	   count(1),
+       max(username),
+       max(machine),
+       Min(to_char(logon_time, 'ddMon hh24:mi')) as First_login,
+       max(to_char(logon_time, 'ddMon hh24:mi')) as last_login
+  from v$session, v$sql
+ where username = 'QC_LOS'
+   and HASH_VALUE = PREV_HASH_VALUE
+   group by SQL_TEXT
+######################################################################   
+
+##################### To Kill Inactive session #############
+BEGIN
+  FOR r IN (select sid,serial# from v$session where status='INACTIVE')
+  LOOP
+      EXECUTE IMMEDIATE 'alter system kill session ''' || r.sid  || ',' 
+        || r.serial# || ''' immediate';
+  END LOOP;
+END;
+
+##################################################

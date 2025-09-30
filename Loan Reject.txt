@@ -1,0 +1,2 @@
+--qc_los.qt_loan_reject
+--QC_LOS.QT_CR_REOPEN_HIST 

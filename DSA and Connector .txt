@@ -1,0 +1,38 @@
+with agency_branch as(
+    SELECT
+        at.agencymasterid,
+        LISTAGG(g.description, ', ') WITHIN GROUP (ORDER BY g.description) AS user_branches
+    FROM
+        (select at.agencymasterid,at.branch from qc_master.qm_agency_x_activity_type at 
+group by at.agencymasterid,at.branch) at
+    LEFT JOIN
+        qc_master.qm_geo g ON g.geoid = at.branch
+    GROUP BY
+         at.agencymasterid)      
+select am.agencymastercode, am.agencymastername,atm.agencytypemastername,ab.user_branches
+from qc_master.qm_agencymaster am
+left join agency_branch ab
+on ab.agencymasterid = am.agencymasterid
+left join qc_master.qm_agencytypemaster atm on atm.agencytypemasterid=am.agencytypeid
+where am.agencytypeid in ('1000000001','1000000007') and am.active='A';
+
+
+--- legel technical 
+
+with agency_branch as(
+    SELECT
+        at.agencymasterid,
+        LISTAGG(g.description, ', ') WITHIN GROUP (ORDER BY g.description) AS user_branches
+    FROM
+        (select at.agencymasterid,at.branch from qc_master.qm_agency_x_activity_type at 
+group by at.agencymasterid,at.branch) at
+    LEFT JOIN
+        qc_master.qm_geo g ON g.geoid = at.branch
+    GROUP BY
+         at.agencymasterid)      
+select am.agencymastercode, am.agencymastername,atm.agencytypemastername,ab.user_branches
+from qc_master.qm_agencymaster am
+left join agency_branch ab
+on ab.agencymasterid = am.agencymasterid
+left join qc_master.qm_agencytypemaster atm on atm.agencytypemasterid=am.agencytypeid
+where am.agencytypeid not  in ('1000000001','1000000007','1000000002') and am.active='A';

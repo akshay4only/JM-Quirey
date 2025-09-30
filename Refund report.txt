@@ -1,0 +1,46 @@
+SELECT
+    chd.code                         uniqueid,
+    ld.prospectcode                  lan,
+    it.instrumenttypename,
+    chd.instrument_date,
+    chd.instrument_no,
+    chd.instrument_amount,
+    b_jm.bank_name                   jm_bank_name,
+    bb_jm.branch_name                jm_branch_name,
+    chd.bank_acnt_no                 jm_account,
+    bb_jm.ifsc_code                  jm_ifsc_code,
+    bb_jm.micr_code                  jm_micr_code,
+    chd.maker_remarks,
+    bkt.ifsccode                     cust_bank_ifsc_code,
+    bkt.micrcode                     cust_bank_micr_code,
+    upper(bkt.beneficiary_name)      beneficiary_name,
+    bkt.accountno,
+    b_cust.bank_name                 cust_bank,
+    bb_cust.branch_name              cust_bank_branch,
+    chd.cust_ifsccode   ,
+    chd.cust_micrcode   ,
+    chd.issue_infavour  ,
+    chd.cust_account    ,
+    chd.cust_bankname   ,
+    chd.cust_branchname
+    
+FROM
+    qc_lms.qt_charge_adjustment chd
+JOIN
+    qc_los.qt_loandetail ld ON ld.prospectid = chd.prospect_id
+LEFT JOIN
+    qc_master.qm_instrumenttype it ON it.instrumenttypeid = chd.instrument_type
+LEFT JOIN
+    qc_master.qm_bank b_jm ON b_jm.bank_id = chd.bank_id
+LEFT JOIN
+    qc_master.qm_bankbranch bb_jm ON bb_jm.bankbranch_id = chd.bankbranch_id
+LEFT JOIN
+    qc_los.qt_bankdetails bkt ON chd.bank_detail_id = bkt.bankdetailsid
+LEFT JOIN
+    qc_master.qm_bank b_cust ON b_cust.bank_id = bkt.bankid
+LEFT JOIN
+    qc_master.qm_bankbranch bb_cust ON bb_cust.bankbranch_id = bkt.bankbranch_id
+WHERE
+    chd.trans_type = 'REFUND'
+    AND chd.auth_status = 'A'
+   ;

@@ -1,0 +1,3 @@
+update qc_master.qm_resitype re set re.resitypeid='1000000028',re.resitypename='RES000027'
+where re.resitypename='PARTLY RENTED-PARTLY VACANT'
+and re.resitypeid='1000000014';  

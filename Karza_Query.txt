@@ -1,0 +1,165 @@
+select * from qc_integration_box.ib_cbl_req_res;
+  select * from qc_integration_box.ib_k_req_res;
+     SELECT * from qc_integration_box.ibs_request_master
+  SELECT * FROM  QC_LOS.QT_LOANDETAIL
+  SELECT * FROM  QC_LOS.QT_LOAN_X_CUSTOMER---
+  
+  
+  select LD.PROSPECTCODE,substr(corelationid,38)as Customer_ID,Status,tag as Service_Name,trunc(created)as Created_date 
+  from qc_integration_box.ib_k_req_res@IBSPDB K,
+       QC_LOS.QT_LOANDETAIL LD,
+       QC_LOS.QT_LOAN_X_CUSTOMER LXC
+  WHERE LXC.PROSPECTID = LD.PROSPECTID AND
+        substr(K.corelationid,38)= LXC.APPLICANTcode AND
+        trunc(created) between '01-Apr-24' and '07-Oct-24';
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
+select * from qc_integration_box.ib_cbl_req_res;
+  select * from qc_integration_box.ib_k_req_res@ibspdb;
+     SELECT * from qc_integration_box.ibs_request_master
+  SELECT * FROM  QC_LOS.QT_LOANDETAIL
+  SELECT * FROM  QC_LOS.QT_LOAN_X_CUSTOMER---
+  
+ 
+ 
+  select at.applicanttypename,lxc.applicantid from qc_master.qm_applicanttype AT,QC_LOS.QT_LOAN_X_CUSTOMER LXC
+  
+  select column_value val, rownum from apex_string.split('67#ok#by','#') where rownum = 1
+  
+  select substr(corelationid,38) from qc_integration_box.ib_k_req_res@IBSPDB where Upper(internal_req) like '%"PAN"%'
+  
+  
+  select LD.PROSPECTCODE,substr(corelationid,38)as Customer_ID,at.applicanttypename,Status,tag as Service_Name,trunc(created)as Created_date 
+  from qc_integration_box.ib_k_req_res@IBSPDB K,
+       QC_LOS.QT_LOANDETAIL LD,
+       QC_LOS.QT_LOAN_X_CUSTOMER LXC,
+      qc_master.qm_applicanttype AT
+  WHERE LXC.PROSPECTID = LD.PROSPECTID AND
+        lxc.applicanttype = at.applicanttypeid and
+        substr(K.corelationid,38)= LXC.APPLICANTcode --AND
+       -- trunc(created) between '01-Apr-24' and '07-Oct-24' 
+         order by 1,6 desc;
+        
+   
+    select count(*) from qc_integration_box.ib_k_req_res@IBSPDB K
+       WHERE trunc(created) between '01-Apr-24' and '07-Oct-24' ;    
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--karza
+
+
+
+  select k.corelationid,LD.PROSPECTCODE,
+  substr(corelationid,38)as Customer_ID,
+  at.applicanttypename,
+  Status,tag as Service_Name,
+  trunc(created)as Created_date 
+  from qc_integration_box.ib_k_req_res@IBSPDB K,
+       QC_LOS.QT_LOANDETAIL LD,
+       QC_LOS.QT_LOAN_X_CUSTOMER LXC,
+       qc_master.qm_applicanttype AT
+  WHERE LXC.PROSPECTID = LD.PROSPECTID AND
+        lxc.applicanttype = at.applicanttypeid and
+        substr(K.corelationid,38)= LXC.APPLICANTcode AND
+        trunc(created) between '01-Apr-24' and '07-Oct-24' order by 1 desc;
+      
+
+connect with ibs for below data 
+
+query to extract pan
+
+  select  corelationid,internal_req,tag,substr(regexp_substr(response,'(?"status_msg":").*$',1,1),15),
+    case 
+    when tag ='PAN' then substr(internal_req,15,10)
+    else to_clob('BLANK')
+    END Pan_number
+    from qc_integration_box.ib_k_req_res k
+   where 
+    trunc(created) between '01-Apr-24' and '07-Oct-24'
+    ;
+
+
+query to extract reason
+
+     select  corelationid,substr(regexp_substr(response,'(?"status_msg":").*$',1,1),15) from qc_integration_box.ib_k_req_res k 
+   where 
+    trunc(created) between '01-Apr-24' and '07-Oct-24' 
+
+---------------------------------------------------------------------------------------------------------------------------
+
+05-12-2024
+
+
+Updated query 
+
+  select k.corelationid,LD.PROSPECTCODE,
+  substr(corelationid,38)as Customer_ID,
+  at.applicanttypename,
+  Status,tag as Service_Name,
+  trunc(created)as Created_date,
+  ld.disbursaldate,
+  p.prodname,
+  s.loanstatusname
+  from qc_integration_box.ib_k_req_res@IBSPDB K,
+       QC_LOS.QT_LOANDETAIL LD,
+       QC_LOS.QT_LOAN_X_CUSTOMER LXC,
+       qc_master.qm_applicanttype AT,
+       qc_master.qm_product P,
+       qc_master.qm_loan_status s
+  WHERE LXC.PROSPECTID = LD.PROSPECTID AND
+        lxc.applicanttype = at.applicanttypeid and
+        substr(K.corelationid,38)= LXC.APPLICANTcode AND
+        p.productid=ld.scheme and
+        s.loanstatusid= ld.loansubstatusid and
+        trunc(created) between '01-Nov-24' and '30-Nov-24' order by 1 desc;
+
+
+-----------------------------------------------------------------------------
+
+SELECT
+    k.corelationid,
+    LD.PROSPECTCODE,
+    substr(k.corelationid, 38) AS Customer_ID,
+    at.applicanttypename,
+    k.Status,
+    k.tag AS Service_Name,
+    trunc(k.created) AS Created_date,
+    ld.disbursaldate,
+    p.prodname,
+    s.loanstatusname
+FROM
+    qc_integration_box.ib_k_req_res@IBSPDB K,
+    QC_LOS.QT_LOANDETAIL LD,
+    QC_LOS.QT_LOAN_X_CUSTOMER LXC,
+    qc_master.qm_applicanttype AT,
+    qc_master.qm_product P,
+    qc_master.qm_loan_status s
+WHERE
+    LXC.PROSPECTID = LD.PROSPECTID
+    AND lxc.applicanttype = at.applicanttypeid
+    AND substr(K.corelationid, 38) = LXC.APPLICANTcode
+    AND p.productid = ld.scheme
+    AND s.loanstatusid = ld.loansubstatusid
+    AND k.tag = 'PAN' -- Added this back as it was implied
+    AND k.Status = 'Failure' -- Keep this to only get failure records in the main set
+    --AND trunc(k.created) BETWEEN TO_DATE('01-Nov-2024', 'DD-Mon-YYYY') AND TO_DATE('30-Nov-2024', 'DD-Mon-YYYY') -- Main query date filter
+    AND NOT EXISTS (
+        SELECT 1
+        FROM qc_integration_box.ib_k_req_res@IBSPDB K_sub
+        WHERE substr(K_sub.corelationid, 38) = substr(k.corelationid, 38) -- Same Customer_ID
+          AND K_sub.tag = 'PAN'
+          AND K_sub.Status = 'Success' -- Look for successful attempts
+          -- IMPORTANT: If you want to check for success ANYTIME, remove this date filter.
+          -- If you want success WITHIN THE SAME PERIOD, keep this date filter.
+         -- AND trunc(K_sub.created) BETWEEN TO_DATE('01-Nov-2024', 'DD-Mon-YYYY') AND TO_DATE('30-Nov-2024', 'DD-Mon-YYYY')
+    )
+ORDER BY
+    k.corelationid DESC;
+
+
+        
